@@ -75,6 +75,18 @@ const Header = () => {
         }
     };
 
+    const toProfile = (e) => {
+        e.preventDefault();
+
+        const jwtToken = localStorage.getItem("jwtToken");
+
+        if (!jwtToken) {
+            dispatch(setIsSign(true));
+        } else {
+            navigate("/profile");
+        }
+    };
+
     return (
         <header className="sticky z-50 top-0 pb-[3rem] xl:pb-0 xl:border-b-[2.5rem] border-black border-solid">
             <nav className="relative grid grid-cols-12 gap-2 xl:gap-5 px-1 xl:px-2.5 py-4 bg-white text-xl">
@@ -157,8 +169,8 @@ const Header = () => {
                         </span>
                     </Link>
                     <Link
-                        onClick={() => {
-                            dispatch(setIsSign(true));
+                        onClick={(e) => {
+                            toProfile(e);
                         }}
                     >
                         <img

@@ -1,6 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
+import { setIsSign } from "../../features/triggerSlice";
 
 import lineIcon from "../../images/line.png";
 import twitterIcon from "../../images/twitter.png";
@@ -10,6 +12,9 @@ import cart from "../../images/cart-mobile.png";
 import member from "../../images/member-mobile.png";
 
 const Footer = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     //redux
     const { cartLength } = useSelector((state) => state.productsSlice);
 
@@ -22,6 +27,18 @@ const Footer = () => {
     ];
 
     const footerIcons = [lineIcon, twitterIcon, facebookIcon];
+
+    const toProfile = (e) => {
+        e.preventDefault();
+
+        const jwtToken = localStorage.getItem("jwtToken");
+
+        if (!jwtToken) {
+            dispatch(setIsSign(true));
+        } else {
+            navigate("/profile");
+        }
+    };
 
     return (
         <footer className="grid grid-cols-12 gap-x-0 gap-y-5 xs:gap-3 xl:gap-5 px-1.5 xl:px-2.5 py-8 bg-[#313538]">
@@ -87,7 +104,12 @@ const Footer = () => {
                     </div>
                     <h2>購物車</h2>
                 </Link>
-                <Link className="flex justify-center items-center hover:opacity-75">
+                <Link
+                    onClick={(e) => {
+                        toProfile(e);
+                    }}
+                    className="flex justify-center items-center hover:opacity-75"
+                >
                     <img src={member} alt="member" />
                     <h2>會員</h2>
                 </Link>
