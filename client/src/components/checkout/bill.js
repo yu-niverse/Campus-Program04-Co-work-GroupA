@@ -74,15 +74,62 @@ const Bill = ({ cart, fee, totalPrice }) => {
             }
 
             const prime = result.card.prime;
+            const jwtToken = localStorage.getItem("jwtToken");
 
             try {
-                const res = await axios.post(checkoutUrl, {
-                    prime,
-                    cart,
-                    formObject,
-                    totalPrice,
-                    fee,
-                });
+                let list = [];
+                for (const cartItem of cart) {
+                    const {
+                        productId: id,
+                        title: name,
+                        price,
+                        color,
+                        colorCode,
+                        size,
+                        amount: qty,
+                    } = cartItem;
+                    list.push({
+                        id,
+                        name,
+                        price,
+                        color: { name: color, code: colorCode },
+                        size,
+                        qty,
+                    });
+                }
+
+                const {
+                    name,
+                    telephone: phone,
+                    address,
+                    email,
+                    time,
+                } = formObject;
+
+                const res = await axios.post(
+                    checkoutUrl,
+                    {
+                        prime,
+                        order: {
+                            shipping: "delivery",
+                            payment: "credit_card",
+                            subtotal: totalPrice,
+                            freight: fee,
+                            total: totalPrice + fee,
+                            recipient: {
+                                name,
+                                phone,
+                                email,
+                                address,
+                                time,
+                            },
+                            list,
+                        },
+                    },
+                    {
+                        headers: { Authorization: "Bearer " + jwtToken },
+                    }
+                );
 
                 localStorage.setItem("cart", JSON.stringify([]));
 
@@ -95,7 +142,11 @@ const Bill = ({ cart, fee, totalPrice }) => {
                 // sold out
                 const res = error.response;
                 if (res.status === 400) {
-                    alert(res.data.message);
+                    alert("Create Order Error");
+                }
+
+                if (res.status === 401) {
+                    alert("Please Sign in First");
                 }
             }
         });
