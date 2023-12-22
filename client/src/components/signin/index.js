@@ -31,6 +31,7 @@ const Signin = () => {
                 localStorage.setItem("user", JSON.stringify(user));
 
                 navigate("/profile");
+                dispatch(setIsSign(false));
             }
         } catch (error) {
             const { status } = error.response;
