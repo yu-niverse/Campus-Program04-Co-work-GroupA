@@ -1,0 +1,29 @@
+{
+    "slides": [
+        {
+            "id": 0,
+            "url": "/images/banner0.png",
+            "alt": "banner 0"
+        },
+        {
+            "id": 1,
+            "url": "/images/banner1.jpg",
+            "alt": "banner 1"
+        },
+        {
+            "id": 2,
+            "url": "/images/banner2.jpg",
+            "alt": "banner 2"
+        },
+        {
+            "id": 3,
+            "url": "/images/banner3.jpg",
+            "alt": "banner 3"
+        },
+        {
+            "id": 4,
+            "url": "/images/banner4.jpg",
+            "alt": "banner 4"
+        }
+    ]
+}

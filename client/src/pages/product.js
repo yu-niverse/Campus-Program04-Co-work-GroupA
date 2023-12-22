@@ -1,0 +1,60 @@
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
+import axios from "axios";
+import { MoreInfo, Skeleton, ProductDetails } from "../components/product";
+
+const Product = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
+
+    const { id } = useParams();
+    const url = `${process.env.REACT_APP_BACKEND_URL}/api/1.0/products/details?id=${id}`;
+
+    const getProduct = async () => {
+        try {
+            // wait for 1 sec ( to see skeleton loading )
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            const res = await axios.get(url);
+            const detail = res.data.data;
+
+            return detail;
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const { data, isLoading, isFetching, isError, isSuccess, refetch } =
+        useQuery({
+            queryFn: getProduct,
+            queryKey: ["productDetail"],
+            staleTime: Infinity, // if you didn't set this, the data will call continuously when you alt+tab
+        });
+
+    useEffect(() => {
+        refetch();
+    }, []);
+
+    return (
+        <main className="grid grid-cols-12">
+            {isError && (
+                <div className="col-span-12 text-center py-6 my-6 bg-red-500 text-white ">
+                    No Product Found! See other products here ↓
+                </div>
+            )}
+
+            <div className="col-start-2 xl:col-start-4 col-span-10 xl:col-span-6 gap-x-1 my-12">
+                {(isLoading || isFetching) && <Skeleton />}
+                {isSuccess && <ProductDetails data={data} productId={id} />}
+
+                <MoreInfo />
+            </div>
+        </main>
+    );
+};
+
+export default Product;
