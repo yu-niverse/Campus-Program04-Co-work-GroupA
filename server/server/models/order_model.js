@@ -62,6 +62,21 @@ const setDeliveryDate = async (orderId, deliveryDate) => {
 }
 
 
+const getPendingOrders = async () => {
+    const query = `
+      SELECT o.*, u.line_notify_token 
+      FROM order_table o
+      JOIN user u ON o.user_id = u.id
+      WHERE o.delivery_date < NOW() AND o.is_notification_sent = false
+    `;
+    const [orders] = await pool.execute(query);
+    return orders;
+}
+
+const updateOrderNotificationStatus = async (connection, orderId) => {
+    await connection.execute('UPDATE order_table SET is_notification_sent = true WHERE id = ?', [orderId]);
+}
+
 module.exports = {
     createOrder,
     createPayment,
@@ -69,4 +84,6 @@ module.exports = {
     getUserPayments,
     getUserPaymentsGroupByDB,
     setDeliveryDate,
+    getPendingOrders,
+    updateOrderNotificationStatus,
 };
