@@ -8,6 +8,7 @@ const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 // Express Initialization
 const express = require('express');
 const cors = require('cors');
+const { startCronJobs } = require('./util/cron');
 const app = express();
 
 app.set('trust proxy', true);
@@ -29,6 +30,7 @@ app.use('/api/' + API_VERSION, rateLimiterRoute, [
     require('./server/routes/marketing_route'),
     require('./server/routes/user_route'),
     require('./server/routes/order_route'),
+    require('./server/routes/line_route'),
 ]);
 
 // Page not found
@@ -48,6 +50,7 @@ if (NODE_ENV != 'production') {
             console.log('redis connect fail');
         });
         console.log(`Listening on port: ${port}`);
+        startCronJobs();
     });
 }
 

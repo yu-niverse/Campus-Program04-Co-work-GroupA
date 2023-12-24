@@ -1,4 +1,4 @@
-const {pool} = require('./mysqlcon');
+const { pool } = require('./mysqlcon');
 const got = require('got');
 
 const createOrder = async (order) => {
@@ -6,7 +6,7 @@ const createOrder = async (order) => {
     return result.insertId;
 };
 
-const createPayment = async function(orderId, payment){
+const createPayment = async function (orderId, payment) {
     const conn = await pool.getConnection();
     try {
         await conn.query('START TRANSACTION');
@@ -16,16 +16,16 @@ const createPayment = async function(orderId, payment){
         return true;
     } catch (error) {
         await conn.query('ROLLBACK');
-        return {error};
+        return { error };
     } finally {
         conn.release();
     }
 };
 
-const payOrderByPrime = async function(tappayKey, tappayId, prime, order){
+const payOrderByPrime = async function (tappayKey, tappayId, prime, order) {
     let res = await got.post('https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime', {
         headers: {
-            'Content-Type':'application/json',
+            'Content-Type': 'application/json',
             'x-api-key': tappayKey
         },
         json: {
@@ -56,10 +56,17 @@ const getUserPaymentsGroupByDB = async () => {
     return orders;
 };
 
+const setDeliveryDate = async (orderId, deliveryDate) => {
+    const [orders] = await pool.query('UPDATE order_table SET delivery_date = ? WHERE id = ?', [deliveryDate, orderId]);
+    return orders;
+}
+
+
 module.exports = {
     createOrder,
     createPayment,
     payOrderByPrime,
     getUserPayments,
     getUserPaymentsGroupByDB,
+    setDeliveryDate,
 };
