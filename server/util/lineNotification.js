@@ -40,7 +40,17 @@ const revokeToken = async (token) => {
 }
 
 
+const generateDeliverMessage = async (order) => {
+  const message =
+    `${order.details.recipient.name} 您好，您的訂單已送達，請留意收件。` + '\n\n' +
+    `收件地址：${order.details.recipient.address}` + '\n' +
+    `總價： ${order.details.total}` + '\n'
+  return message;
+}
+
+
 module.exports = {
   revokeToken,
-  sendLineNotification
+  sendLineNotification,
+  generateDeliverMessage
 }

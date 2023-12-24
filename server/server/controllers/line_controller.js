@@ -5,13 +5,38 @@ const { sendLineNotification, revokeToken } = require('../../util/lineNotificati
 const User = require('../models/user_model');
 
 
+const startLineOauth = async (req, res) => {
+  const clientId = process.env.LINE_SERVICE_CLIENT_ID;
+  const redirectUri = encodeURIComponent(`${process.env.BACKEND_HOST}/api/1.0/line/oauth/callback`);
+  const responseType = 'code';
+  const scope = 'notify';
+  const responseMode = 'form_post';
+
+  const email = req.query.email;
+  const originalUrl = req.query.originalUrl;
+  const stateObj = { email: email, originalUrl: originalUrl };
+  const state = Buffer.from(JSON.stringify(stateObj)).toString('base64');
+
+  const authUrl = `https://notify-bot.line.me/oauth/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_mode=${responseMode}`;
+
+  // Redirect the user to the authorization URL
+  res.redirect(authUrl);
+}
+
 const lineOAuthCallback = async (req, res) => {
-  const { code, state: email } = req.body; // Get the code from query parameters
+  const { code, state } = req.body; // Get the code from query parameters
+  // Decode the state parameter from base64 and parse it as JSON
+  const decodedState = Buffer.from(state, 'base64').toString('utf-8');
+  const stateObj = JSON.parse(decodedState);
+
+  const email = stateObj.email; // You can use this email as needed
+  const originalUrl = stateObj.originalUrl; // The URL to redirect the user back to
+
 
   const data = querystring.stringify({
     grant_type: 'authorization_code',
     code: code,
-    redirect_uri: 'http://localhost:3000/api/1.0/line/oauth/callback',
+    redirect_uri: `http://localhost:3000/api/1.0/line/oauth/callback`,
     client_id: process.env.LINE_SERVICE_CLIENT_ID,
     client_secret: process.env.LINE_SERVICE_CLIENT_SECRET
   });
@@ -24,44 +49,38 @@ const lineOAuthCallback = async (req, res) => {
     });
 
     const token = response.data.access_token;
-    console.log(token);
-
+    console.log('token', token);
+    if (!token) {
+      return res.status(400).send('Cannot get token');
+    }
 
     // save the token to database
-    const result = await User.saveLineNotifyToken(email, token);
+    await User.saveLineNotifyToken(email, token);
 
-    if (!result) {
-      return res.status(500).send('Internal Server Error');
-    }
 
     const message = 'Welcome to STYLiSH!!';
     const filePath = path.join(__dirname, 'logo.png'); // Replace with your actual file path
     sendLineNotification(token, filePath, message);
 
     // redirect to frontend
-    res.redirect('http://localhost:3001/profile');
+    res.redirect(originalUrl);
 
   } catch (error) {
-    console.error('Error exchanging code for token:', error);
-    res.status(500).send('Internal Server Error');
+    throw new Error('Error lineOAuthCallback: ' + error);
   }
 }
 
 
-const lineNotify = async (req, res) => {
+const sendLineNotify = async (req, res) => {
   try {
     const { email, message } = req.body;
-    console.log('hi', email, message);
     const user = await User.getUserDetail(email, null);
-    console.log(user);
     const token = user.line_notify_token;
-    console.log(token);
 
     // const filePath = path.join(__dirname, 'logo.png'); // Replace with your actual file path
     if (!token) {
       return res.status(400).send('No token found');
     } else {
-      console.log("token", token);
       sendLineNotification(token, null, message);
     }
 
@@ -95,8 +114,10 @@ const revokeLineNotify = async (req, res) => {
   }
 }
 
+
 module.exports = {
+  startLineOauth,
   lineOAuthCallback,
-  lineNotify,
+  sendLineNotify,
   revokeLineNotify,
 }

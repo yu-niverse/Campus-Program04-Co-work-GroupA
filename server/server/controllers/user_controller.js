@@ -126,7 +126,6 @@ const signIn = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     const isLineNotifyOn = await User.isLineNotifyToken(req.user.email);
-
     res.status(200).send({
         data: {
             provider: req.user.provider,

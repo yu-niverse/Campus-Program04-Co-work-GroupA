@@ -4,6 +4,5 @@ import Product from "./product";
 import Checkout from "./checkout";
 import Thankyou from "./thankyou";
 import Profile from "./profile";
-import TestNotify from "./testNotify";
 
-export { Homepage, Layout, Product, Checkout, Thankyou, Profile, TestNotify };
+export { Homepage, Layout, Product, Checkout, Thankyou, Profile };

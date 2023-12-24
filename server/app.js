@@ -2,13 +2,13 @@ require('dotenv').config();
 const morganBody = require('morgan-body');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
+const { startCronJobs } = require('./util/cron');
 const { PORT_TEST, PORT, NODE_ENV, API_VERSION } = process.env;
 const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 
 // Express Initialization
 const express = require('express');
 const cors = require('cors');
-const { startCronJobs } = require('./util/cron');
 const app = express();
 
 app.set('trust proxy', true);
