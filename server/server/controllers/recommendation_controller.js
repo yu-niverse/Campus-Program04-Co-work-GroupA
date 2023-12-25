@@ -23,7 +23,6 @@ async function getCollections(req, res) {
                 product_id: [curr.product_id],
             });
         }
-
         return acc;
     }, []);
 
@@ -274,6 +273,27 @@ async function runMain() {
 
 runMain();
 
+
+async function getRecommendations(req,res){
+    const user_id = req.query.user_id;
+    
+        const query = `
+            SELECT *  FROM recommendations
+            WHERE user_id = ?
+        `;
+        try {
+            const [rows] = await pool.execute(query, [user_id]);
+            console.log(rows[0]);
+            const result = {
+                user_id,
+                product_id : rows.map(recommendation => recommendation.product_id)
+            }
+            res.status(200).send(result)
+        } catch (error) {
+            console.error(`Failed to get recommendations: ${error}`);
+        }
+}
+
 module.exports = {
-    getCollections,
+    getRecommendations
 };
