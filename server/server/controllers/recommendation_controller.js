@@ -275,7 +275,7 @@ runMain();
 
 
 async function getRecommendations(req,res){
-    const user_id = req.query.user_id;
+    const user_id = req.query.userId;
     
         const query = `
             SELECT *  FROM recommendations
