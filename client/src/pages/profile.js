@@ -10,7 +10,6 @@ const Profile = () => {
     const navigate = useNavigate();
 
     const [user, setUser] = useState({});
-    const [collectionDetails, setCollectionDetails] = useState([]);
 
     const signOut = (e) => {
         e.preventDefault();
@@ -37,26 +36,19 @@ const Profile = () => {
         const { id: userId } = JSON.parse(localStorage.getItem("user"));
 
         try {
-            const res = await axios.get(
+            const { data: collections } = await axios.get(
                 `${backendUrl}/collection/getAll/${userId}`
             );
-            return res.data;
+            const collectionDetails = await getProductDetails(collections);
+            return collectionDetails;
         } catch (error) {
             console.log(error);
             return null;
         }
     };
 
-    const { data: collections, refetch } = useQuery({
-        queryFn: getAllCollections,
-        queryKey: ["collections"],
-        staleTime: Infinity,
-    });
-
     const getProductDetails = async (collections) => {
-        if (!collections) {
-            return [];
-        }
+        collections = collections || [];
 
         let result = [];
 
@@ -72,19 +64,27 @@ const Profile = () => {
             }
         }
 
-        setCollectionDetails(result);
+        return result;
     };
 
-    useEffect(() => {
-        getProductDetails(collections);
-    }, [collections]);
+    const {
+        data: collectionDetails,
+        refetch,
+        isSuccess,
+        isLoading,
+        isFetching,
+    } = useQuery({
+        queryFn: getAllCollections,
+        queryKey: ["collections"],
+        staleTime: Infinity,
+    });
 
     useEffect(() => {
         refetch();
     }, []);
 
     return (
-        <div className="my-20 grid grid-cols-12 gap-3">
+        <div className="my-20 grid grid-cols-12 gap-y-5">
             <h2 className="col-start-5 col-span-4 text-center text-2xl">
                 {user?.name}
             </h2>
@@ -99,55 +99,93 @@ const Profile = () => {
             >
                 Sign Out
             </button>
-            <ul className="col-start-2 col-span-10 divide-y divide-solid divide-black">
-                {collectionDetails?.map((collectionDetail) => {
-                    const {
-                        id,
-                        category,
-                        title,
-                        description,
-                        price,
-                        texture,
-                        wash,
-                        place,
-                        story,
-                        main_image,
-                    } = collectionDetail;
 
-                    return (
-                        <li key={id} className="grid grid-cols-12 py-3">
-                            <Link
-                                to={`/product/${id}`}
-                                className="group col-span-3 max-h-[200px] overflow-hidden"
+            <hr className="col-span-full" />
+
+            <h2 className="col-start-5 col-span-4 text-3xl text-center font-bold tracking-widest">
+                收藏清單
+            </h2>
+            {(isLoading || isFetching) && (
+                <ul className="animate-pulse col-start-2 col-span-10">
+                    {[1, 2, 3].map((item) => {
+                        return (
+                            <li
+                                key={`skeleton-${item}`}
+                                className="grid grid-cols-12 gap-x-2 py-3"
                             >
-                                <img
-                                    src={main_image}
-                                    alt=""
-                                    className="w-full h-full object-contain group-hover:scale-110 transition-all duration-300"
-                                />
-                            </Link>
+                                <div className="group col-span-3 h-[200px] overflow-hidden bg-slate-200"></div>
 
-                            <article className="col-span-8">
-                                <h2 className="text-2xl font-medium tracking-widest">
-                                    {title}
-                                </h2>
+                                <article className="col-span-8 text-transparent flex flex-col gap-y-2">
+                                    <h3 className="text-2xl bg-slate-200">
+                                        title
+                                    </h3>
 
-                                <p className="text-xs">{category}</p>
+                                    <div className="text-xs bg-slate-200">
+                                        category
+                                    </div>
 
-                                <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {description}
-                                </p>
+                                    <div className="bg-slate-200">price</div>
 
-                                <p>${price}</p>
-                                <p>{texture}</p>
-                                <p>{wash}</p>
-                                <p>{place}</p>
-                                <p>{story}</p>
-                            </article>
-                        </li>
-                    );
-                })}
-            </ul>
+                                    <div className="bg-slate-200">
+                                        description
+                                    </div>
+
+                                    <div className="bg-slate-200">story</div>
+                                </article>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+            {isSuccess && (
+                <ul className="col-start-2 col-span-10 divide-y divide-solid divide-black">
+                    {collectionDetails?.map((collectionDetail) => {
+                        const {
+                            id,
+                            category,
+                            title,
+                            description,
+                            price,
+                            story,
+                            main_image,
+                        } = collectionDetail;
+
+                        return (
+                            <li
+                                key={id}
+                                className="grid grid-cols-12 gap-x-2 py-3"
+                            >
+                                <Link
+                                    to={`/product/${id}`}
+                                    className="group col-span-3 max-h-[200px] overflow-hidden"
+                                >
+                                    <img
+                                        src={main_image}
+                                        alt={title}
+                                        className="w-full h-full object-contain group-hover:scale-110 transition-all duration-300"
+                                    />
+                                </Link>
+
+                                <article className="col-span-8">
+                                    <h3 className="text-2xl font-medium tracking-widest">
+                                        {title}
+                                    </h3>
+
+                                    <p className="text-xs">{category}</p>
+
+                                    <p>${price}</p>
+
+                                    <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+                                        {description}
+                                    </p>
+
+                                    <p>{story}</p>
+                                </article>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
         </div>
     );
 };
