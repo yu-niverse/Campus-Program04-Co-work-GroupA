@@ -27,6 +27,7 @@
     "homepage": "https://github.com/cwpeng/stylish-backend#readme",
     "dependencies": {
         "assert": "^2.0.0",
+        "axios": "^1.6.2",
         "bcrypt": "^5.0.1",
         "chai": "^4.2.0",
         "chai-http": "^4.3.0",
@@ -45,6 +46,7 @@
         "multer": "^1.4.4",
         "mysql": "^2.18.1",
         "mysql2": "^2.3.3",
+        "node-cron": "^3.0.3",
         "nodemon": "^2.0.4",
         "redis": "^4.0.4",
         "sinon": "^8.1.1",

@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-
+import { useQuery } from "@tanstack/react-query";
 import { CollectionDetails, Skeleton } from "../components/profile";
+
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const Profile = () => {
     const navigate = useNavigate();
-
     const [user, setUser] = useState({});
+    const [isLineNotifyOn, setIsLineNotifyOn] = useState(false);
 
     const signOut = (e) => {
         e.preventDefault();
@@ -33,6 +32,50 @@ const Profile = () => {
         const user = JSON.parse(localStorage.getItem("user"));
         setUser(user);
     }, []);
+
+
+    useEffect(() => {
+        const jwtToken = localStorage.getItem("jwtToken");
+        async function getUserProfile() {
+            try {
+                const { data } = await axios.get(`${backendUrl}/user/profile`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+                console.log(data.data);
+                setIsLineNotifyOn(data.data.isLineNotifyOn);
+
+            } catch (error) {
+                // Handle error
+                console.error(error);
+            }
+        }
+        getUserProfile();
+    }, [isLineNotifyOn]);
+
+
+    const handleNotify = async () => {
+        const email = encodeURIComponent(user.email);
+        const originalUrl = encodeURIComponent(window.location.href);
+        window.location.href = `${backendUrl}/start-line-oauth?email=${email}&originalUrl=${originalUrl}`;
+    }
+
+    const handleRevoke = async () => {
+        const email = user.email;
+        try {
+            const response = await axios.post(`${backendUrl}/line/notify/revoke`, { email });
+            if (response.status === 200) {
+                alert('Revoke Line Notify token successfully');
+                setIsLineNotifyOn(false);
+                return;
+            }
+        } catch (error) {
+            alert('Revoke Line Notify token failed');
+            return;
+        }
+    }
 
     const getAllCollections = async () => {
         const { id: userId } = JSON.parse(localStorage.getItem("user"));
@@ -95,6 +138,12 @@ const Profile = () => {
                     {user?.email}
                 </p>
                 <button
+                    onClick={isLineNotifyOn ? handleRevoke : handleNotify}
+                    className={`col-start-6 col-span-2 text-center text-base border-2 px-4 py-2 ${isLineNotifyOn ? 'additional-class-for-on' : 'additional-class-for-off'}`}
+                >
+                    {`Turn ${isLineNotifyOn ? 'Off' : 'On'} Line Notify`}
+                </button>
+                <button
                     className="col-start-4 sm:col-start-5 xl:col-start-6 col-span-6 sm:col-span-4 xl:col-span-2 p-1 border border-solid border-black rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
                     onClick={(e) => {
                         signOut(e);
@@ -129,5 +178,9 @@ const Profile = () => {
         </div>
     );
 };
+
+
+
+
 
 export default Profile;
