@@ -4,6 +4,7 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { CollectionDetails, Skeleton } from "../components/profile";
 
+
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const Profile = () => {
