@@ -43,7 +43,7 @@ const checkout = async (req, res) => {
 
     // for testing purpose, set delivery date to 2 minutes later
     const deliveryDate = new Date();
-    deliveryDate.setMinutes(deliveryDate.getMinutes() + 2);
+    deliveryDate.setMinutes(deliveryDate.getMinutes() + 1);
 
     console.log("timetime", deliveryDate.getTime());
     await Order.setDeliveryDate(orderId, deliveryDate.getTime());

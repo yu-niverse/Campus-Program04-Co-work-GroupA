@@ -67,7 +67,7 @@ const getPendingOrders = async () => {
       SELECT o.*, u.line_notify_token 
       FROM order_table o
       JOIN user u ON o.user_id = u.id
-      WHERE o.delivery_date < NOW() AND o.is_notification_sent = false
+      WHERE o.delivery_date < UNIX_TIMESTAMP(NOW(3)) * 1000 AND o.is_notification_sent = false
     `;
     const [orders] = await pool.execute(query);
     return orders;
