@@ -20,10 +20,27 @@ const startLineOauth = async (req, res) => {
   const authUrl = `https://notify-bot.line.me/oauth/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_mode=${responseMode}`;
 
   // Redirect the user to the authorization URL
-  res.redirect(authUrl);
+  return res.redirect(authUrl);
 }
 
-const lineOAuthCallback = async (req, res) => {
+const lineOAuthFailedCallback = (req, res) => {
+  const { error, error_description, state } = req.query;
+  try {
+    if (error) {
+      console.error('Error lineOAuthCallback:', error);
+      console.log('Error: ' + error_description);
+      const decodedState = Buffer.from(state, 'base64').toString('utf-8');
+      const stateObj = JSON.parse(decodedState);
+      const originalUrl = stateObj.originalUrl; // The URL to redirect the user back to
+      console.log('decodedState', decodedState, originalUrl);
+      return res.redirect(originalUrl);
+    }
+  } catch (error) {
+    console.error('Failed lineOAuthCallback:', error);
+  }
+}
+
+const lineOAuthSuccessCallback = async (req, res) => {
   const { code, state } = req.body; // Get the code from query parameters
   // Decode the state parameter from base64 and parse it as JSON
   const decodedState = Buffer.from(state, 'base64').toString('utf-8');
@@ -117,7 +134,8 @@ const revokeLineNotify = async (req, res) => {
 
 module.exports = {
   startLineOauth,
-  lineOAuthCallback,
+  lineOAuthSuccessCallback,
+  lineOAuthFailedCallback,
   sendLineNotify,
   revokeLineNotify,
 }
