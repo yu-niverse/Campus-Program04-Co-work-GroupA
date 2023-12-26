@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+
+import { CollectionDetails, Skeleton } from "../components/profile";
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
@@ -84,108 +86,43 @@ const Profile = () => {
     }, []);
 
     return (
-        <div className="my-20 grid grid-cols-12 gap-y-5">
-            <h2 className="col-start-5 col-span-4 text-center text-2xl">
-                {user?.name}
-            </h2>
-            <p className="col-start-5 col-span-4 text-center text-base">
-                {user?.email}
-            </p>
-            <button
-                className="col-start-6 col-span-2 p-1 border border-solid border-black rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
-                onClick={(e) => {
-                    signOut(e);
-                }}
-            >
-                Sign Out
-            </button>
+        <div className="my-10 grid grid-cols-12 gap-y-5">
+            <section className="col-span-full grid grid-cols-12 gap-y-2 mb-3">
+                <h2 className="col-span-full text-center text-2xl">
+                    {user?.name}
+                </h2>
+                <p className="col-span-full text-center text-base">
+                    {user?.email}
+                </p>
+                <button
+                    className="col-start-4 sm:col-start-5 xl:col-start-6 col-span-6 sm:col-span-4 xl:col-span-2 p-1 border border-solid border-black rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
+                    onClick={(e) => {
+                        signOut(e);
+                    }}
+                >
+                    Sign Out
+                </button>
+            </section>
 
             <hr className="col-span-full" />
 
-            <h2 className="col-start-5 col-span-4 text-3xl text-center font-bold tracking-widest">
-                收藏清單
-            </h2>
-            {(isLoading || isFetching) && (
-                <ul className="animate-pulse col-start-2 col-span-10">
-                    {[1, 2, 3].map((item) => {
-                        return (
-                            <li
-                                key={`skeleton-${item}`}
-                                className="grid grid-cols-12 gap-x-2 py-3"
-                            >
-                                <div className="group col-span-3 h-[200px] overflow-hidden bg-slate-200"></div>
-
-                                <article className="col-span-8 text-transparent flex flex-col gap-y-2">
-                                    <h3 className="text-2xl bg-slate-200">
-                                        title
-                                    </h3>
-
-                                    <div className="text-xs bg-slate-200">
-                                        category
-                                    </div>
-
-                                    <div className="bg-slate-200">price</div>
-
-                                    <div className="bg-slate-200">
-                                        description
-                                    </div>
-
-                                    <div className="bg-slate-200">story</div>
-                                </article>
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-            {isSuccess && (
-                <ul className="col-start-2 col-span-10 divide-y divide-solid divide-black">
-                    {collectionDetails?.map((collectionDetail) => {
-                        const {
-                            id,
-                            category,
-                            title,
-                            description,
-                            price,
-                            story,
-                            main_image,
-                        } = collectionDetail;
-
-                        return (
-                            <li
-                                key={id}
-                                className="grid grid-cols-12 gap-x-2 py-3"
-                            >
-                                <Link
-                                    to={`/product/${id}`}
-                                    className="group col-span-3 max-h-[200px] overflow-hidden"
-                                >
-                                    <img
-                                        src={main_image}
-                                        alt={title}
-                                        className="w-full h-full object-contain group-hover:scale-110 transition-all duration-300"
-                                    />
-                                </Link>
-
-                                <article className="col-span-8">
-                                    <h3 className="text-2xl font-medium tracking-widest">
-                                        {title}
-                                    </h3>
-
-                                    <p className="text-xs">{category}</p>
-
-                                    <p>${price}</p>
-
-                                    <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-                                        {description}
-                                    </p>
-
-                                    <p>{story}</p>
-                                </article>
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
+            <section className="col-span-full grid grid-cols-12 gap-y-3">
+                <h2 className="col-span-full text-2xl sm:text-3xl text-center font-bold tracking-widest">
+                    收藏清單
+                </h2>
+                {(isLoading || isFetching) && <Skeleton />}
+                {isSuccess && (
+                    <ul className="col-start-1 sm:col-start-2 col-span-full sm:col-span-10 mx-3 divide-y divide-solid divide-black">
+                        {collectionDetails?.map((collectionDetail) => {
+                            return (
+                                <CollectionDetails
+                                    collectionDetail={collectionDetail}
+                                />
+                            );
+                        })}
+                    </ul>
+                )}
+            </section>
         </div>
     );
 };
