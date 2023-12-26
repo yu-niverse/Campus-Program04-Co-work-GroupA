@@ -6,7 +6,7 @@ import { Homepage, Product, Checkout, Thankyou, Profile } from "./pages";
 
 const App = () => {
     return (
-        <div>
+        <div className="relative min-h-screen">
             <Header />
             <Signin />
 
