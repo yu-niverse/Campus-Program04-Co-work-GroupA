@@ -41,7 +41,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="grid grid-cols-12 gap-x-0 gap-y-5 xs:gap-3 xl:gap-5 px-1.5 xl:px-2.5 py-8 bg-[#313538]">
+        <footer className="absolute w-full left-0 bottom-0 grid grid-cols-12 gap-x-0 gap-y-5 xs:gap-3 xl:gap-5 px-1.5 xl:px-2.5 py-8 bg-[#313538]">
             {/* links */}
             <ul className="col-start-2 xs:col-start-3 2xl:col-start-3 col-span-6 xs:col-span-5 xl:col-span-7 2xl:col-span-5 grid grid-cols-6 xs:grid-cols-5 xl:divide-x divide-solid divide-[#F5F5F5] items-center text-start xl:text-center text-xs xs:text-base text-[#F5F5F5]">
                 {footerContexts.map((context, index) => {
