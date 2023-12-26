@@ -16,9 +16,6 @@ const Product = () => {
 
     const getProduct = async () => {
         try {
-            // wait for 1 sec ( to see skeleton loading )
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
             const res = await axios.get(url);
             const detail = res.data.data;
 
@@ -40,7 +37,7 @@ const Product = () => {
     }, []);
 
     return (
-        <main className="grid grid-cols-12">
+        <main className="grid grid-cols-12 pb-20">
             {isError && (
                 <div className="col-span-12 text-center py-6 my-6 bg-red-500 text-white ">
                     No Product Found! See other products here ↓
