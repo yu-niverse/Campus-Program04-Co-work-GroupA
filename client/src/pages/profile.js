@@ -110,13 +110,16 @@ const Profile = () => {
                 <h2 className="col-span-full text-2xl sm:text-3xl text-center font-bold tracking-widest">
                     收藏清單
                 </h2>
+
                 {(isLoading || isFetching) && <Skeleton />}
+
                 {isSuccess && (
                     <ul className="col-start-1 sm:col-start-2 col-span-full sm:col-span-10 mx-3 divide-y divide-solid divide-black">
                         {collectionDetails?.map((collectionDetail) => {
                             return (
                                 <CollectionDetails
                                     collectionDetail={collectionDetail}
+                                    refetch={refetch}
                                 />
                             );
                         })}
