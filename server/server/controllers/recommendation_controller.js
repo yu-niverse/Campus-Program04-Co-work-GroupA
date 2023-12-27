@@ -139,6 +139,23 @@ function findUserIndex(user_id, inputFile) {
     return -1;
 }
 
+async function getDefault() {
+    const query = `
+        SELECT product_id, COUNT(*) as count
+        FROM collections
+        GROUP BY product_id
+        ORDER BY count DESC
+        LIMIT 6;
+    `
+    try {
+        const [rows] = await pool.execute(query);
+        return rows.map(row => row.product_id);
+    }
+    catch (error) {
+        console.error(`Failed to get default recommendations: ${error}`);
+    }
+}
+
 async function main() {
     try {
         let inputFile = await getCollections();
@@ -290,6 +307,15 @@ async function getRecommendations(req,res){
             }
             res.status(200).send(result)
         } catch (error) {
+            // return default if no recommendations
+            if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+                const defaultRecommendations = await getDefault();
+                res.status(200).send({
+                    user_id,
+                    product_id: defaultRecommendations
+                });
+                return;
+            }
             console.error(`Failed to get recommendations: ${error}`);
         }
 }
