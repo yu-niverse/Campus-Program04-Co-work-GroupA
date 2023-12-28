@@ -112,6 +112,10 @@ const ChatBox = () => {
                         </div>
                     )}
 
+                    {(isLoading || isFetching) && (
+                        <div className="animate-pulse w-full h-[400px] bg-slate-300"></div>
+                    )}
+
                     {isSuccess &&
                         messageList?.map((item, index) => {
                             const { time, sender_role, message } = item;
