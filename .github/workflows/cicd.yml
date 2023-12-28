@@ -36,6 +36,6 @@ jobs:
           script: |
             cd ${{ secrets.EC2_TARGET_DIR }}
             docker pull ${{ secrets.SERVER_IMAGE }}
-            docker compose --env-file etc/app.env down
-            docker compose --env-file etc/app.env up -d
-            docker compose --env-file etc/app.env ps
+            docker compose --env-file .env down
+            docker compose --env-file .env up -d
+            docker compose --env-file .env ps
