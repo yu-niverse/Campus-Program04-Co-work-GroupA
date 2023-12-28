@@ -14,6 +14,7 @@ const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 const ChatBox = () => {
     const [showChatBox, setShowChatBox] = useState(false);
 
+    const [nextPage, setNextPage] = useState(0);
     const [messageText, setMessageText] = useState("");
     const [messageList, setMessageList] = useState([]);
 
@@ -21,6 +22,7 @@ const ChatBox = () => {
         const jwtToken = localStorage.getItem("jwtToken");
 
         if (!jwtToken) {
+            setMessageList([]);
             return [];
         }
 
@@ -31,9 +33,11 @@ const ChatBox = () => {
                     headers: { Authorization: jwtToken },
                 }
             );
-            const result = data.messages.reverse();
 
+            const { messages, next_paging } = data;
+            const result = messages.reverse();
             setMessageList(result);
+            setNextPage(next_paging || null);
             return result;
         } catch (error) {
             console.log(error);
@@ -51,6 +55,38 @@ const ChatBox = () => {
         queryKey: ["messages"],
         staleTime: Infinity,
     });
+
+    const loadPrevMessage = async (e) => {
+        e.preventDefault();
+
+        const jwtToken = localStorage.getItem("jwtToken");
+
+        if (!jwtToken) {
+            setMessageList([]);
+            return;
+        }
+
+        try {
+            const { data } = await axios.get(
+                `${backendUrl}/messages?paging=${nextPage}`,
+                {
+                    headers: { Authorization: jwtToken },
+                }
+            );
+
+            const { messages, next_paging } = data;
+
+            const result = messages.reverse();
+            console.log(nextPage);
+            console.log([result, ...messageList]);
+
+            setMessageList([...result, ...messageList]);
+
+            setNextPage(next_paging || null);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const sendMessage = async (e) => {
         if (!messageText) return;
@@ -114,6 +150,17 @@ const ChatBox = () => {
 
                     {(isLoading || isFetching) && (
                         <div className="animate-pulse w-full h-[400px] bg-slate-300"></div>
+                    )}
+
+                    {nextPage && (
+                        <button
+                            className="py-1.5 text-base text-black bg-white border border-solid border-black rounded-lg hover:text-white hover:bg-black transition-all duration-300"
+                            onClick={(e) => {
+                                loadPrevMessage(e);
+                            }}
+                        >
+                            Load previous messages
+                        </button>
                     )}
 
                     {isSuccess &&
