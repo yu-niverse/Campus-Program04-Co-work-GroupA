@@ -5,20 +5,19 @@ const redis = require('../../util/cache');
 async function buyProduct(productId, userId, quantity) {
     const userKey = `user:${userId}:product:${productId}`;
     const inventoryKey = `product:${productId}:inventory`;
-
+    console.log('quantity: ' + quantity);
     const multi = redis.multi();
-
     // Start the transaction
     multi.get(inventoryKey);
-    multi.decr(inventoryKey);
+
     multi.set(userKey, 'true');
 
     // Execute the transaction
     const results = await multi.exec();
-    
 
     // Check if the inventory was greater than 0 before decrementing
     const inventoryBeforeDecrement = parseInt(results[0][1], 10);
+    console.log('inventoryBeforeDecrement: ' + inventoryBeforeDecrement);
     if (inventoryBeforeDecrement >= quantity) {
         // Success, store user purchase information in Redis
         const USER_PURCHASE_PREFIX = 'user';
@@ -29,7 +28,7 @@ async function buyProduct(productId, userId, quantity) {
             quantity,
             timestamp: Date.now(),
         });
-
+        multi.decrby(inventoryKey, quantity);
         return quantity;
     } else {
         return 0; // Failure, not enough inventory
@@ -68,36 +67,62 @@ async function syncPurchaseDataToDatabase() {
     }
 }
 
+// 應用程式啟動時執行一次，或者在需要同步庫存的地方調用
+async function syncProductInventoryToRedis(productId) {
+    try {
+        const getProductInventoryQuery = 'SELECT stock FROM seckill_variants WHERE product_id = ?';
+        const productRow = await pool.query(getProductInventoryQuery, [productId]);
+        const stock = productRow[0][0].stock;
+        console.log('stock', stock);
+        await redis.set(`product:${productId}:inventory`, stock);
+    } catch (error) {
+        console.error(`Failed to sync product inventory to Redis: ${error}`);
+    }
+}
+
+// 在需要商品庫存時，先從 Redis 中取得，如果沒有再同步庫存到 Redis
+async function getProductInventory(productId) {
+    const inventoryKey = `product:${productId}:inventory`;
+    let stock = await redis.get(inventoryKey);
+
+    if (stock === null) {
+        // 如果 Redis 中沒有庫存，則同步庫存到 Redis
+        await syncProductInventoryToRedis(productId);
+        // 再從 Redis 中取得庫存
+        stock = await redis.get(inventoryKey);
+    }
+
+    return stock;
+}
+
 async function Seckill(req, res) {
     const { productId, userId } = req.params;
     console.log('productId', productId);
     const quantity = 1;
     const conn = await pool.getConnection();
     try {
-        const getProductInventoryQuery = 'SELECT stock FROM seckill_variants WHERE product_id = ?';
-        const productRow = await conn.query(getProductInventoryQuery, [productId]);
-        const stock = productRow[0][0].stock;
+        const stock = await getProductInventory(productId);
         console.log('stock', stock);
         redis.set(`product:${productId}:inventory`, stock);
     } catch (e) {
         console.error(e);
+    } finally {
+        if (conn) {
+            conn.release();
+        }
     }
-
-    try{
-        const userKey = `user:${userId}:product:${productId}`;
-    const hasPurchased = await redis.get(userKey);
-    if (hasPurchased) {
-        return res.status(400).json({ error: '已經搶購過該商品' });
-    }
-    
-    } catch (e) {
-        console.error(e);
-    }
-    
 
     try {
         const userKey = `user:${userId}:product:${productId}`;
-        const script = `
+        const hasPurchased = await redis.get(userKey);
+        if (hasPurchased) {
+            return res.status(400).json({ error: '已經搶購過該商品' });
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    const userKey = `user:${userId}:product:${productId}`;
+    const script = `
       local inventory = tonumber(redis.call('get', 'product:${productId}:inventory') or 0)
       if inventory > 0 then
         redis.call('decr', 'product:${productId}:inventory')
@@ -108,40 +133,38 @@ async function Seckill(req, res) {
       end
     `;
 
-        const result = await redis.eval(script, 0);
-        if (result === 1) {
-            const lockResult = await buyProduct(productId, userId, quantity);
-            console.log("lockResult",lockResult);
-            if (lockResult > 0) {
-                const USER_PURCHASE_PREFIX = 'user';
-                const userPurchaseKey = `${USER_PURCHASE_PREFIX}:${userId}:product:${productId}`;
-                redis.set(userPurchaseKey, 'true');
-            }
-            return res.json({ success: true, message: '搶購成功' });
-        } 
-    }
-    catch (err) {
-        console.log({ error: '庫存不足，搶購失敗' } );
+    const result = await redis.eval(script, 0);
+    console.log('result', result);
+    if (result === 1) {
+        const lockResult = await buyProduct(productId, userId, quantity);
+        console.log('lockResult', lockResult);
+        if (lockResult > 0) {
+            const USER_PURCHASE_PREFIX = 'user';
+            const userPurchaseKey = `${USER_PURCHASE_PREFIX}:${userId}:product:${productId}`;
+            await redis.set(userPurchaseKey, 'true');
+        }
+
+        return res.json({ success: true, message: '搶購成功' });
+    } else {
+        console.log({ error: '庫存不足，搶購失敗' });
         return res.status(400).json({ error: '庫存不足，搶購失敗' });
     }
 }
 
-
-
 // async function buyProduct(productId, userId, quantity) {
 //     const userKey = `user:${userId}:product:${productId}`;
 //     const inventoryKey = `product:${productId}:inventory`;
-  
+
 //     const multi = redis.multi();
-  
+
 //     // Start the transaction
 //     multi.get(inventoryKey);
 //     multi.decr(inventoryKey);
 //     multi.set(userKey, 'true');
-  
+
 //     // Execute the transaction
 //     const results = await multi.exec();
-  
+
 //     // Check if the inventory was greater than 0 before decrementing
 //     const inventoryBeforeDecrement = parseInt(results[0][1], 10);
 //     if (inventoryBeforeDecrement >= quantity) {
@@ -150,9 +173,6 @@ async function Seckill(req, res) {
 //       return 0; // Failure, not enough inventory
 //     }
 //   }
-  
-
-
 
 // const updateStockQuery = 'UPDATE seckill_variants SET stock = stock - ? WHERE product_id = ?';
 // async function checkAndUpdateStock(productId, quantity) {
@@ -181,8 +201,6 @@ async function Seckill(req, res) {
 //         connection.release();
 //     }
 // }
-
-
 
 // async function Seckill(req, res) {
 //     const { productId, userId } = req.params;
@@ -229,13 +247,12 @@ async function Seckill(req, res) {
 //             } else {
 //                 console.log('庫存不足，無法更新');
 //             }
-        
+
 //         }
 //         return res.json({ success: true, message: '搶購成功' });
 //     } else {
 //         return res.status(400).json({ error: '庫存不足，搶購失敗' });
 //     }
 // }
-
 
 module.exports = { Seckill };
