@@ -1,0 +1,32 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: ${NGINX_HOST}
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+      - /etc/letsencrypt/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem
+    depends_on:
+      - api
+    env_file:
+      - .env
+    networks:
+      - stylish-net
+
+  api: 
+    image: ${API_IMAGE}
+    container_name: ${API_HOST}
+    ports:
+      - ${API_PORT}:${API_PORT}
+    env_file:
+      - .env
+    networks:
+      - stylish-net
+
+networks:
+  stylish-net:
+    driver: bridge
