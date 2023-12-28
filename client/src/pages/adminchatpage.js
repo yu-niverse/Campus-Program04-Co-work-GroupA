@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket";
-import { Chat } from "../components/chat";
+import { AdminChat } from "../components/chat";
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -21,14 +21,14 @@ const ChatPage = () => {
     console.log("user", user);
     setUser(user);
     if (user?.id) {
-      socket.emit("user_join", user);
+      socket.emit("representative_join", user);
     }
   }, []);
 
   return (
     <div>
       <h1>Chat</h1>
-      <Chat socket={socket} user={user} jwtToken={jwtToken} />
+      <AdminChat socket={socket} user={user} jwtToken={jwtToken} />
     </div>
   )
 }

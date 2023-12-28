@@ -5,14 +5,16 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const Chat = ({ socket, user, jwtToken }) => {
   const [messageText, setMessageText] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [customerId, setCustomerId] = useState(null);
 
   const sendMessage = async () => {
-    if (messageText) {
+    console.log("customerId", customerId);
+    if (messageText && customerId) {
       const messageObj = {
-        customer_id: user.id,
+        customer_id: customerId,
         message: messageText,
         time: new Date(),
-        sender_role: "customer",
+        sender_role: "representative",
       }
 
       await socket.emit("send_message", messageObj);
@@ -27,8 +29,13 @@ const Chat = ({ socket, user, jwtToken }) => {
       setMessageList((prev) => [data, ...prev]);
     });
 
+    socket.on("assigned_user", (data) => {
+      console.log("assigned_user", data.userId);
+      setCustomerId(data.userId);
+    });
+
     return () => {
-      console.log("client disconnect");
+      console.log("rep disconnect");
       socket.disconnect();
     }
   }, [socket]);
@@ -36,24 +43,6 @@ const Chat = ({ socket, user, jwtToken }) => {
   useEffect(() => {
     console.log("messageList", messageList);
   }, [messageList]);
-
-
-  useEffect(() => {
-    const getMessages = async () => {
-      const { data: { messages, next_paging } } = await axios.get(`${BACKEND_URL}/api/1.0/messages`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`
-        }
-      });
-      setMessageList([...messageList, ...messages]);
-    }
-
-    if (jwtToken && messageList.length === 0) {
-      getMessages();
-    }
-  }, [jwtToken]);
-
 
   return (
     <div>

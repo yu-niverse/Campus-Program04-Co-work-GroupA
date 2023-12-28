@@ -1,4 +1,5 @@
 import Chat from "./chat";
+import AdminChat from "./adminchat";
 
 
-export { Chat };
+export { Chat, AdminChat };
