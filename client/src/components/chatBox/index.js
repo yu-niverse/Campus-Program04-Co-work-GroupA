@@ -12,8 +12,10 @@ import { LuSendHorizonal } from "react-icons/lu";
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const ChatBox = () => {
-    const [showChatBox, setShowChatBox] = useState(false);
+    const lastMessageRef = useRef(null);
+    const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
+    const [showChatBox, setShowChatBox] = useState(false);
     const [nextPage, setNextPage] = useState(0);
     const [messageText, setMessageText] = useState("");
     const [messageList, setMessageList] = useState([]);
@@ -74,15 +76,14 @@ const ChatBox = () => {
                 }
             );
 
+            setShouldScrollToBottom(false);
+
             const { messages, next_paging } = data;
-
             const result = messages.reverse();
-            console.log(nextPage);
-            console.log([result, ...messageList]);
-
             setMessageList([...result, ...messageList]);
-
             setNextPage(next_paging || null);
+
+            setShouldScrollToBottom(true);
         } catch (error) {
             console.log(error);
         }
@@ -120,6 +121,13 @@ const ChatBox = () => {
     }, [socket]);
 
     useEffect(() => {
+        // Scroll to the last message when showChatBox is toggled
+        if (showChatBox && lastMessageRef.current && shouldScrollToBottom) {
+            lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [showChatBox, messageList]);
+
+    useEffect(() => {
         refetch();
     }, []);
 
@@ -133,7 +141,7 @@ const ChatBox = () => {
                     refetch();
                 }}
             >
-                <BsChatDots className=" w-6 h-6" />
+                <BsChatDots className="w-6 h-6" />
             </button>
 
             <section
@@ -166,10 +174,13 @@ const ChatBox = () => {
                     {isSuccess &&
                         messageList?.map((item, index) => {
                             const { time, sender_role, message } = item;
+                            const isLastMessage =
+                                index === messageList.length - 1;
 
                             return (
                                 <li
                                     key={`message-${index}`}
+                                    ref={isLastMessage ? lastMessageRef : null}
                                     className="flex flex-col"
                                 >
                                     {sender_role === "customer" ? (
