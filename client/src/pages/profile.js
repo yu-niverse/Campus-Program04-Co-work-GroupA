@@ -23,6 +23,7 @@ const Profile = () => {
 
     useEffect(() => {
         const jwtToken = localStorage.getItem("jwtToken");
+        console.log("jwtToken", jwtToken);
         if (!jwtToken) {
             navigate("/");
             alert("Please Sign in First");
