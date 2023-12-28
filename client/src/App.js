@@ -9,6 +9,7 @@ import {
     Thankyou,
     Profile,
     ChatPage,
+    Admin,
 } from "./pages";
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
                 <Route path="/thankyou" element={<Thankyou />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/admin" element={<Admin />} />
             </Routes>
 
             <Footer />
