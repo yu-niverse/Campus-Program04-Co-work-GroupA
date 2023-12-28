@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import { Footer, Header, Signin } from "./components";
+import { Footer, Header, Signin, ChatBox } from "./components";
 import { Homepage, Product, Checkout, Thankyou, Profile } from "./pages";
 
 const App = () => {
@@ -9,6 +9,7 @@ const App = () => {
         <div className="relative min-h-screen">
             <Header />
             <Signin />
+            <ChatBox />
 
             <Routes>
                 <Route path="/" element={<Homepage />} />
