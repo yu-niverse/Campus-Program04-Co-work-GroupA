@@ -14,7 +14,6 @@ CREATE TABLE messages (
 
 const createMessage = async (data) => {
   const { customer_id, message, time, sender_role } = data;
-  console.log("t", time);
   const [result] = await pool.query('INSERT INTO messages (customer_id, message, sender_role, time) VALUES (?, ?, ?, ?)',
     [customer_id, message, sender_role, time]);
   return result.insertId;

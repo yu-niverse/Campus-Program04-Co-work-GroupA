@@ -3,7 +3,7 @@ const morganBody = require('morgan-body');
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
-const setupSocketEvents = require('./util/socket');
+const setupSocketEvents = require('./util/socket/socket');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
 const { startCronJobs } = require('./util/cron');
@@ -35,7 +35,7 @@ app.set('json spaces', 2);
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-morganBody(app);
+// morganBody(app);
 
 
 // API routes

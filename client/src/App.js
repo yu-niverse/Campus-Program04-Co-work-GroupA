@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import { Footer, Header, Signin } from "./components";
-import { Homepage, Product, Checkout, Thankyou, Profile, ChatPage } from "./pages";
+import { Homepage, Product, Checkout, Thankyou, Profile, ChatPage, AdminChatPage } from "./pages";
 
 const App = () => {
     return (
@@ -17,6 +17,7 @@ const App = () => {
                 <Route path="/thankyou" element={<Thankyou />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/adminchatpage" element={<AdminChatPage />} />
             </Routes>
 
             <Footer />
