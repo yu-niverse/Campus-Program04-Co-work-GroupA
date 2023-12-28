@@ -18,8 +18,8 @@ const ChatBox = () => {
 
             <section
                 className={`${
-                    showChatBox ? "opacity-100" : " opacity-0"
-                } fixed bottom-28 xl:bottom-20 right-5 w-10/12 sm:w-5/12 lg:w-4/12 xl:w-3/12 h-[400px] flex flex-col justify-between p-3 bg-white ring-slate-800 ring-2 rounded-md transition-all duration-300 ease-in-out`}
+                    showChatBox ? "fixed opacity-100" : "hidden opacity-0"
+                } bottom-28 xl:bottom-20 right-5 w-10/12 sm:w-5/12 lg:w-4/12 xl:w-3/12 h-[400px] flex flex-col justify-between p-3 bg-white ring-slate-800 ring-2 rounded-md transition-all duration-300 ease-in-out`}
             >
                 <ul className="h-[85%] px-2 py-3 grid gap-y-3 border border-solid border-black overflow-y-scroll overflow-x-hidden">
                     {[
