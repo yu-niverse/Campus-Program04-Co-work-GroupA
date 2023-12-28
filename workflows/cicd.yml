@@ -17,11 +17,11 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "Building Docker image..."
-          docker build -t chiehyu914/stylish-cowork:latest . --file server/Dockerfile --no-cache --platform linux/amd64
+          docker build -t ${{ SERVER_IMAGE }} . --file server/Dockerfile --no-cache --platform linux/amd64
           echo "Logging in to Docker Hub..."
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           echo "Pushing Docker image to Docker Hub..."
-          docker push chiehyu914/stylish-cowork:latest
+          docker push ${{ SERVER_IMAGE }}
 
   deploy:
       runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ${{ secrets.EC2_TARGET_DIR }}
-            docker pull chiehyu914/stylish-cowork:latest
+            docker pull ${{ SERVER_IMAGE }}
             docker compose --env-file etc/app.env down
             docker compose --env-file etc/app.env up -d
             docker compose --env-file etc/app.env ps
