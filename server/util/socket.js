@@ -21,16 +21,16 @@ function handleJoinRoom(socket) {
 }
 
 function handleSendMessage(socket) {
-  socket.on('send_message_customer', async (data) => {
-    const { customerId, messageText, time } = data;
+  socket.on('send_message', async (data) => {
+    const { customer_id, message, time, sender_role } = data;
     await Message.createMessage({
-      customerId,
-      messageText,
+      customer_id,
+      message,
       time,
-      senderRole: 'customer',
+      sender_role,
     });
-    console.log(`id: ${socket.id}: ` + customerId + ' sent a message: ' + messageText);
-    socket.to(customerId).emit('receive_message', data);
+    console.log(`id: ${socket.id}: ` + customer_id + ' sent a message: ' + message);
+    socket.to(customer_id).emit('receive_message', data);
   });
 }
 

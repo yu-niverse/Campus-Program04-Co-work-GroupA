@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Chat = ({ socket, user, jwtToken }) => {
@@ -10,37 +9,45 @@ const Chat = ({ socket, user, jwtToken }) => {
   const sendMessage = async () => {
     if (messageText) {
       const messageObj = {
-        customerId: user.id,
-        messageText,
+        customer_id: user.id,
+        message: messageText,
         time: new Date(),
+        sender_role: "customer",
       }
 
-      await socket.emit("send_message_customer", messageObj);
+      await socket.emit("send_message", messageObj);
       setMessageText("");
-      setMessageList([...messageList, messageObj]);
+      setMessageList([messageObj, ...messageList]);
     }
   }
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
       console.log("receive_message", data);
-      setMessageList([...messageList, data]);
+      setMessageList((prev) => [data, ...prev]);
     });
   }, [socket]);
 
-  // useEffect(() => {
-  //   const getMessages = async () => {
-  //     const { data } = await axios.get(`${BACKEND_URL}/api/1.0/messages`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': `Bearer ${jwtToken}`
-  //       }
-  //     });
-  //     setMessageList(data);
-  //   }
-  //   getMessages();
-  // }, [messageList]);
+  useEffect(() => {
+    console.log("messageList", messageList);
+  }, [messageList]);
 
+
+  useEffect(() => {
+    const getMessages = async () => {
+      const { data: { messages, next_paging } } = await axios.get(`${BACKEND_URL}/api/1.0/messages`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtToken}`
+        }
+      });
+      setMessageList([...messageList, ...messages]);
+    }
+
+    if (jwtToken && messageList.length === 0) {
+      getMessages();
+    }
+  }, [jwtToken]);
 
 
   return (
