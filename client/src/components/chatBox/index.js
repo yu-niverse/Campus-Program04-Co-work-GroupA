@@ -20,6 +20,8 @@ const ChatBox = () => {
     const [messageText, setMessageText] = useState("");
     const [messageList, setMessageList] = useState([]);
 
+    const [role, setRole] = useState(null);
+
     const getMessages = async () => {
         const jwtToken = localStorage.getItem("jwtToken");
 
@@ -99,8 +101,6 @@ const ChatBox = () => {
             return;
         }
 
-        socket.emit("join_room", { user });
-
         const messageObj = {
             customer_id: user.id,
             message: messageText,
@@ -116,9 +116,31 @@ const ChatBox = () => {
     useEffect(() => {
         socket.on("receive_message", (data) => {
             console.log("receive_message", data);
-            setMessageList([...messageList, data]);
+
+            setMessageList((prev) => [...prev, data]);
         });
+
+        return () => {
+            console.log("client disconnect");
+            socket.disconnect();
+        };
     }, [socket]);
+
+    useEffect(() => {
+        if (showChatBox) {
+            const user = JSON.parse(localStorage.getItem("user"));
+
+            if (!user) {
+                return;
+            }
+
+            socket.emit("user_join", user);
+        } else if (!showChatBox && role === "customer") {
+            console.log("client disconnect");
+            setRole(null);
+            socket.disconnect();
+        }
+    }, [showChatBox]);
 
     useEffect(() => {
         // Scroll to the last message when showChatBox is toggled
@@ -135,8 +157,9 @@ const ChatBox = () => {
         <div className="fixed bottom-12 xl:bottom-5 right-5 z-20">
             <button
                 className="p-2 bg-white border-2 border-solid border-black rounded-full hover:bg-slate-800 hover:text-white transition-all duration-300 ease-in-out"
-                onClick={(e) => {
+                onClick={async (e) => {
                     e.preventDefault();
+                    setRole("customer");
                     setShowChatBox(!showChatBox);
                     refetch();
                 }}

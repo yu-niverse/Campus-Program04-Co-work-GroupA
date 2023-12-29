@@ -18,7 +18,7 @@ const App = () => {
         <div className="relative min-h-screen">
             <Header />
             <Signin />
-            <ChatBox />
+            {window.location.pathname !== "/admin" && <ChatBox />}
 
             <Routes>
                 <Route path="/" element={<Homepage />} />
