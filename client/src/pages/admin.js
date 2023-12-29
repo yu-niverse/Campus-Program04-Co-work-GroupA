@@ -16,7 +16,7 @@ const Admin = () => {
     const navigate = useNavigate();
     const lastMessageRef = useRef(null);
 
-    const [customerId, setCustomerId] = useState("No Customer Now");
+    const [customerId, setCustomerId] = useState(null);
     const [messageText, setMessageText] = useState("");
     const [messageList, setMessageList] = useState([]);
     const [nextPage, setNextPage] = useState(0);
@@ -123,6 +123,7 @@ const Admin = () => {
 
         socket.on("client_disconnected", (data) => {
             console.log("client_disconnected", data);
+            setMessageList([]);
             setCustomerId(null);
         });
 
@@ -168,10 +169,18 @@ const Admin = () => {
     return (
         <main className="grid grid-cols-12 mt-12 pb-96 2xs:pb-80 xl:pb-40">
             <section className="col-start-2 xl:col-start-3 col-span-10 xl:col-span-8 h-[500px] flex flex-col justify-between mx-5 p-3 bg-white ring-slate-800 ring-2 rounded-md transition-all duration-300 ease-in-out">
-                <h2 className="text-primary">{customerId}</h2>
+                <h2 className="text-primary">
+                    {customerId || "No Customer Now"}
+                </h2>
 
                 <ul className="relative h-[80%] px-2 py-3 grid gap-y-5 border border-solid border-black overflow-y-scroll overflow-x-hidden">
-                    {nextPage && (
+                    {!customerId && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500 text-center font-bold ">
+                            No Customer Now
+                        </div>
+                    )}
+
+                    {customerId && nextPage && (
                         <button
                             className="py-1.5 text-base text-black bg-white border border-solid border-black rounded-lg hover:text-white hover:bg-black transition-all duration-300"
                             onClick={(e) => {
