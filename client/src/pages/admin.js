@@ -116,7 +116,10 @@ const Admin = () => {
 
         // Scroll to the last message when showChatBox is toggled
         if (lastMessageRef.current) {
-            lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+            lastMessageRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
         }
     }, [messageList]);
 
