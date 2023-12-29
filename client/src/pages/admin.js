@@ -121,6 +121,11 @@ const Admin = () => {
             setCustomerId(data.userId);
         });
 
+        socket.on("client_disconnected", (data) => {
+            console.log("client_disconnected", data);
+            setCustomerId(null);
+        });
+
         return () => {
             console.log("rep disconnect");
             socket.disconnect();

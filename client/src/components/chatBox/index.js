@@ -120,20 +120,19 @@ const ChatBox = () => {
             setMessageList((prev) => [...prev, data]);
         });
 
-        return () => {
-            console.log("client disconnect");
-            socket.disconnect();
-        };
+        socket.on("assigned_user", (data) => {
+            console.log("assigned_csr", data);
+        });
     }, [socket]);
 
     useEffect(() => {
-        if (showChatBox) {
+        if (showChatBox && socket) {
             const user = JSON.parse(localStorage.getItem("user"));
 
             if (!user) {
                 return;
             }
-
+            console.log("client connect");
             socket.emit("user_join", user);
         } else if (!showChatBox && role === "customer") {
             console.log("client disconnect");
@@ -151,6 +150,11 @@ const ChatBox = () => {
 
     useEffect(() => {
         refetch();
+
+        return () => {
+            console.log("client disconnect");
+            socket.disconnect();
+        };
     }, []);
 
     return (
