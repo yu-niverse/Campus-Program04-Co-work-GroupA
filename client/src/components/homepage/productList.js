@@ -15,7 +15,12 @@ const ProductList = ({ products }) => {
                         <section id="thumbnail" className="overflow-hidden">
                             <Link to={`/product/${id}`}>
                                 <img
-                                    src={main_image || productThumbnail}
+                                    src={
+                                        main_image.replace(
+                                            "undefined",
+                                            "3000"
+                                        ) || productThumbnail
+                                    }
                                     alt="product"
                                     className="object-cover transition-all duration-300 hover:scale-105"
                                 />

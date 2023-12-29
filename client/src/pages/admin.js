@@ -39,7 +39,7 @@ const Admin = () => {
 
             const { messages, next_paging } = data;
             const result = messages.reverse();
-            setMessageList(result);
+            // setMessageList(result);
             // setNextPage(next_paging || null);
             return result;
         } catch (error) {
