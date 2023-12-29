@@ -1,6 +1,6 @@
 const { handleSendMessage } = require('./messages');
-const { handleRepresentativeConnection } = require('./CSR');
-const { handleUserConnection } = require('./client');
+const { handleRepresentativeConnection, addRepresentativeToAvailableList } = require('./CSR');
+const { handleUserConnection, addUserToWaitingQueue } = require('./client');
 
 let waitingUsers = []; // Queue of waiting users
 let availableRepresentatives = []; // List of available representatives
@@ -11,16 +11,52 @@ function handleConnection(socket) {
 
 function handleDisconnect(socket, io) {
   socket.on('disconnect', () => {
+    console.log("disconnected:", socket.id);
+    availableRepresentatives = removeSocketId(availableRepresentatives, socket.id);
+    waitingUsers = removeSocketId(waitingUsers, socket.id);
+
     // Check if the socket is a client or a representative
     if (socket.userId) {
       // It's a client
-      removeSocketId(waitingUsers, socket.id);
       handleClientDisconnect(socket.userId, io);
     } else if (socket.servedUserId) {
-      removeSocketId(availableRepresentatives, socket.id);
-      socket.to(userId).emit('representative_left', { userId });
+      handleCSRDisconnect(socket.servedUserId, io);
     }
   });
+}
+
+function handleClientDisconnect(clientId, io) {
+  const room = io.sockets.adapter.rooms.get(clientId);
+  if (room) {
+    // Iterate over the Set of sockets in the room
+    for (let socketId of room) {
+      const socket = io.sockets.sockets.get(socketId);
+      if (socket) {
+        // This is a representative serving the client
+        socket.leave(clientId);
+        socket.servedUserId = null;
+        console.log(`Representative ${socket.id} left room ${clientId}`);
+        // You can also notify the representative here, if necessary
+        socket.emit('client_disconnected', clientId);
+        addRepresentativeToAvailableList(availableRepresentatives, socket.repId, socket.id);
+      }
+    }
+  }
+}
+
+function handleCSRDisconnect(clientId, io) {
+  console.log("CSR disconnected:", clientId);
+  const room = io.sockets.adapter.rooms.get(clientId);
+  if (room) {
+    // Iterate over the Set of sockets in the room
+    for (let socketId of room) {
+      const socket = io.sockets.sockets.get(socketId);
+      if (socket.userId === clientId) {
+        socket.leave(clientId);
+        addUserToWaitingQueue(waitingUsers, clientId, socket.id);
+      }
+    }
+  }
 }
 
 function removeSocketId(arr, socketId) {
@@ -38,26 +74,11 @@ function removeSocketId(arr, socketId) {
       }
     }
   });
-}
 
-function handleClientDisconnect(clientId, io) {
-  const room = io.sockets.adapter.rooms.get(clientId);
-  if (room) {
-    // Iterate over the Set of sockets in the room
-    for (let socketId of room) {
-      const socket = io.sockets.sockets.get(socketId);
-      if (socket && socket.servedUserId === clientId) {
-        // This is a representative serving the client
-        socket.leave(clientId);
-        socket.servedUserId = null;
-        console.log(`Representative ${socket.id} left room ${clientId}`);
-        // You can also notify the representative here, if necessary
-        socket.emit('client_disconnected', { clientId });
-      }
-    }
-  }
+  // remove empty objects
+  arr = arr.filter(obj => Object.keys(obj).length > 0);
+  return arr;
 }
-
 
 module.exports = function (io) {
   io.on('connection', (socket) => {
