@@ -1,6 +1,6 @@
 const { handleSendMessage } = require('./messages');
-const { handleRepresentativeConnection, addRepresentativeToAvailableList } = require('./CSR');
-const { handleUserConnection, addUserToWaitingQueue } = require('./client');
+const { handleRepresentativeConnection, findUserOrWait } = require('./CSR');
+const { handleUserConnection, findCSRorWait } = require('./client');
 
 let waitingUsers = []; // Queue of waiting users
 let availableRepresentatives = []; // List of available representatives
@@ -20,6 +20,7 @@ function handleDisconnect(socket, io) {
       // It's a client
       handleClientDisconnect(socket.userId, io);
     } else if (socket.servedUserId) {
+      console.log("handleCSRDisconnect")
       handleCSRDisconnect(socket.servedUserId, io);
     }
   });
@@ -38,7 +39,7 @@ function handleClientDisconnect(clientId, io) {
         console.log(`Representative ${socket.id} left room ${clientId}`);
         // You can also notify the representative here, if necessary
         socket.emit('client_disconnected', clientId);
-        addRepresentativeToAvailableList(availableRepresentatives, socket.repId, socket.id);
+        findUserOrWait(socket, waitingUsers, availableRepresentatives, socket.repId);
       }
     }
   }
@@ -51,9 +52,11 @@ function handleCSRDisconnect(clientId, io) {
     // Iterate over the Set of sockets in the room
     for (let socketId of room) {
       const socket = io.sockets.sockets.get(socketId);
+      console.log("user socket in room: id ", socket.userId)
       if (socket.userId === clientId) {
         socket.leave(clientId);
-        addUserToWaitingQueue(waitingUsers, clientId, socket.id);
+        socket.isWaiting = true;
+        findCSRorWait(socket, io, availableRepresentatives, waitingUsers);
       }
     }
   }
