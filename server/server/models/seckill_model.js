@@ -1,16 +1,15 @@
 const {pool} = require('./mysqlcon');
 const redis = require('../../util/cache');
 
-const getSeckillProducts = async (product_id) => {        
+// const getSeckillProducts = async (product_id) => {        
+//     const productQuery = 'SELECT * FROM seckill_products ORDER BY product_id ' ;
+//     const [productCounts] = await pool.query(productQuery, [product_id]);
 
-    const productQuery = 'SELECT * FROM seckill_products ORDER BY product_id ' ;
-    const [productCounts] = await pool.query(productQuery, [product_id]);
-
-    return {
-        'products': products,
-        'productCount': productCounts[0].count
-    };
-};
+//     return {
+//         'products': products,
+//         'productCount': productCounts[0].count
+//     };
+// };
 
 
 async function buyProduct(productId, userId, quantity) {
@@ -85,56 +84,67 @@ async function syncPurchaseDataToDB() {
                 connection.release();
             }
         }
-
-        for (const key of keys) {
-            const match = key.match(/user:(\d+):product:(\d+)/);
-            if (match) {
-                productId = match[2];
-                const inventoryKey = `product:${productId}:inventory`;
-                currentStock = await redis.get(inventoryKey);
-                console.log("currentStock", currentStock, productId);
-                if (productId != null){
-                    const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
-                    await connection.execute(updateStockQuery, [currentStock, productId]);
-                }
-            }
-        }
-        
-        
     };
-
     setInterval(syncFunction, interval);
 };
 
+
+async function updateStock(productId){
+    const interval = 2000;
+    async function syncStockToDB() {
+        const connection = await pool.getConnection();
+        const inventoryKey = `product:${productId}:inventory`;
+        const currentStock = await redis.get(inventoryKey);
+        console.log("currentStock", currentStock, productId);
+        if(currentStock >= 0 && currentStock != null ){
+        try  {
+            await connection.beginTransaction();
+            const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
+            await connection.execute(updateStockQuery, [currentStock, productId]);
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+    }
+
+    setInterval(syncStockToDB, interval);
+}
+
+
+
+//如果redis沒有庫存資料，就去DB查詢
 async function syncProductInventoryToRedis(productId) {
     try {
         const getProductInventoryQuery = 'SELECT stock FROM seckill_variants WHERE product_id = ?';
         const productRow = await pool.query(getProductInventoryQuery, [productId]);
         const stock = productRow[0][0].stock;
-        console.log('stock in function', stock);
         await redis.set(`product:${productId}:inventory`, stock);
     } catch (error) {
         console.error(`Failed to sync product inventory to Redis: ${error}`);
     }
 }
 
+//取得現有商品庫存
 async function getProductInventory(productId) {
     const inventoryKey = `product:${productId}:inventory`;
     let stock = await redis.get(inventoryKey);
-    console.log(stock)
+    console.log(stock);
     if (!stock || stock == null) {
         await syncProductInventoryToRedis(productId);
         stock = await redis.get(inventoryKey);
-        
     }
-
     return stock;
 }
 
 
 
 module.exports = {
-    getSeckillProducts,
+    // getSeckillProducts,
+    updateStock,
     buyProduct,
     syncPurchaseDataToDB,
     getProductInventory

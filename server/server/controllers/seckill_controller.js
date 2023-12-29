@@ -1,26 +1,30 @@
-const { getSeckillProducts, buyProduct, syncPurchaseDataToDB,getProductInventory } = require('../models/seckill_model');
+const { buyProduct, syncPurchaseDataToDB,getProductInventory,updateStock } = require('../models/seckill_model');
 const { pool } = require('../models/mysqlcon');
 const redis = require('../../util/cache');
+const schedule = require('node-schedule')
+
+let isAppInitialized = false;
+
+async function initializeApp(productId) {
+    await getProductInventory(productId);
+    const job = schedule.scheduleJob('*/5 * * * * *', async function() {
+        await updateStock(productId);
+    });
+    isAppInitialized = true;
+}
 
 syncPurchaseDataToDB();
+// updateStock(productId);
+
+
 
 async function Seckill(req, res) {
     const { productId, userId } = req.params;
     console.log('productId', productId);
     const quantity = 1;
-    const conn = await pool.getConnection();
-    try {
-        const stock = await getProductInventory(productId);
-        console.log('stock', stock);
-        redis.set(`product:${productId}:inventory`, stock);
-    } catch (e) {
-        console.error(e);
-    } finally {
-        if (conn) {
-            conn.release();
-        }
+    if (!isAppInitialized) {
+        await initializeApp(productId);
     }
-
     try {
         const userKey = `user:${userId}:product:${productId}`;
         const hasPurchased = await redis.get(userKey);
