@@ -243,18 +243,20 @@ const Admin = () => {
                         id="message"
                         rows={3}
                         style={{ height: "100%" }}
-                        className="w-11/12 resize-none overflow-y-hidden rounded-s-full"
+                        className="w-11/12 resize-none overflow-y-hidden rounded-s-full disabled:bg-red-100 disabled:cursor-not-allowed"
                         placeholder="請輸入訊息"
                         required
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
+                        disabled={customerId === null}
                     ></textarea>
                     <button
                         type="submit"
-                        className="w-1/12 h-full flex justify-center items-center border border-solid border-l-0 border-black rounded-e-full hover:bg-black hover:text-white"
+                        className="w-1/12 h-full flex justify-center items-center border border-solid border-l-0 border-black rounded-e-full hover:bg-black hover:text-white disabled:hover:bg-white disabled:hover:text-black disabled:opacity-30 disabled:cursor-not-allowed"
                         onClick={(e) => {
                             sendMessage(e);
                         }}
+                        disabled={customerId === null}
                     >
                         <LuSendHorizonal />
                     </button>
