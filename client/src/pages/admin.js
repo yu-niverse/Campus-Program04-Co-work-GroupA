@@ -19,6 +19,8 @@ const Admin = () => {
     const [customerId, setCustomerId] = useState("No Customer Now");
     const [messageText, setMessageText] = useState("");
     const [messageList, setMessageList] = useState([]);
+    const [nextPage, setNextPage] = useState(0);
+    const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
     const [user, setUser] = useState({});
     const [jwtToken, setJwtToken] = useState("");
@@ -31,7 +33,7 @@ const Admin = () => {
 
         try {
             const { data } = await axios.get(
-                `${backendUrl}/messages?paging=0`,
+                `${backendUrl}/customerMessages?paging=0&customerId=${customerId}`,
                 {
                     headers: { Authorization: jwtToken },
                 }
@@ -39,8 +41,8 @@ const Admin = () => {
 
             const { messages, next_paging } = data;
             const result = messages.reverse();
-            // setMessageList(result);
-            // setNextPage(next_paging || null);
+            setMessageList(result);
+            setNextPage(next_paging || null);
             return result;
         } catch (error) {
             console.log(error);
@@ -75,6 +77,37 @@ const Admin = () => {
         await socket.emit("send_message", messageObj);
         setMessageText("");
         setMessageList([...messageList, messageObj]);
+    };
+
+    const loadPrevMessage = async (e) => {
+        e.preventDefault();
+
+        const jwtToken = localStorage.getItem("jwtToken");
+
+        if (!jwtToken) {
+            setMessageList([]);
+            return;
+        }
+
+        try {
+            const { data } = await axios.get(
+                `${backendUrl}/customerMessages?paging=${nextPage}&customerId=${customerId}`,
+                {
+                    headers: { Authorization: jwtToken },
+                }
+            );
+
+            setShouldScrollToBottom(false);
+
+            const { messages, next_paging } = data;
+            const result = messages.reverse();
+            setMessageList([...result, ...messageList]);
+            setNextPage(next_paging || null);
+
+            setShouldScrollToBottom(true);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     useEffect(() => {
@@ -115,7 +148,7 @@ const Admin = () => {
         console.log("messageList", messageList);
 
         // Scroll to the last message when showChatBox is toggled
-        if (lastMessageRef.current) {
+        if (lastMessageRef.current && shouldScrollToBottom) {
             lastMessageRef.current.scrollIntoView({
                 behavior: "smooth",
                 block: "end",
@@ -133,6 +166,17 @@ const Admin = () => {
                 <h2 className="text-primary">{customerId}</h2>
 
                 <ul className="relative h-[80%] px-2 py-3 grid gap-y-5 border border-solid border-black overflow-y-scroll overflow-x-hidden">
+                    {nextPage && (
+                        <button
+                            className="py-1.5 text-base text-black bg-white border border-solid border-black rounded-lg hover:text-white hover:bg-black transition-all duration-300"
+                            onClick={(e) => {
+                                loadPrevMessage(e);
+                            }}
+                        >
+                            Load previous messages
+                        </button>
+                    )}
+
                     {messageList?.map((item, index) => {
                         const { time, sender_role, message } = item;
                         const isLastMessage = index === messageList.length - 1;
