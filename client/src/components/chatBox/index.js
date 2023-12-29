@@ -126,9 +126,9 @@ const ChatBox = () => {
     }, [socket]);
 
     useEffect(() => {
-        if (showChatBox && socket) {
-            const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(localStorage.getItem("user"));
 
+        if (showChatBox && socket) {
             if (!user) {
                 return;
             }
@@ -138,6 +138,10 @@ const ChatBox = () => {
             console.log("client disconnect");
             setRole(null);
             socket.disconnect();
+        }
+
+        if (!socket.connected) {
+            socket.connect();
         }
     }, [showChatBox]);
 
