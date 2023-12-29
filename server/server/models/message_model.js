@@ -28,7 +28,19 @@ const getMessages = async (userId, paging, pageSize) => {
     };
 };
 
+const getCustomerMessages = async (customerId, paging, pageSize) => {
+    const messageQuery = 'SELECT * FROM messages WHERE customer_id = ? ORDER BY message_id DESC LIMIT ?, ?';
+
+    const [messages] = await pool.query(messageQuery, [customerId, pageSize * paging, pageSize]);
+
+    return {
+        messages,
+        messagesCount: messages.length,
+    };
+};
+
 module.exports = {
     createMessage,
     getMessages,
+    getCustomerMessages,
 };
