@@ -5,12 +5,15 @@ function handleUserConnection(socket, io, user, availableRepresentatives, waitin
 
   const repObj = getAvailableRepresentative(availableRepresentatives);
   if (repObj) {
+    console.log("repObj in get avail", repObj)
     const repId = Object.keys(repObj)[0];
+    console.log("repId in get avail", repId)
     joinRepresentativeToUserRoom(repObj[repId], userId, io, socket);
     console.log(`User ${user.name} assigned to representative ${repId}`);
   } else {
     addUserToWaitingQueue(waitingUsers, userId, socket.id);
     console.log("User added to the waiting queue:", user.name);
+    console.log("waitingUsers", waitingUsers.length)
   }
 }
 
@@ -38,3 +41,4 @@ function addUserToWaitingQueue(waitingUsers, userId, socketId) {
 }
 
 exports.handleUserConnection = handleUserConnection;
+exports.addUserToWaitingQueue = addUserToWaitingQueue;

@@ -27,10 +27,10 @@ const Chat = ({ socket, user, jwtToken }) => {
       setMessageList((prev) => [data, ...prev]);
     });
 
-    return () => {
-      console.log("client disconnect");
-      socket.disconnect();
-    }
+    socket.on("assigned_user", (data) => {
+      console.log("assigned_csr", data);
+    });
+
   }, [socket]);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 function handleRepresentativeConnection(socket, io, availableRepresentatives, waitingUsers, rep) {
   console.log("Representative connected:", socket.id);
+  socket.repId = rep.id;
   const userObj = getWaitingUser(waitingUsers);
   if (userObj) {
     const userId = Object.keys(userObj)[0];
@@ -7,7 +8,6 @@ function handleRepresentativeConnection(socket, io, availableRepresentatives, wa
     console.log(`Representative ${socket.id} assigned to user ${userId}`);
   } else {
     addRepresentativeToAvailableList(availableRepresentatives, rep.id, socket.id);
-    console.log("Representative added to the available list:", socket.id);
   }
 }
 
@@ -32,6 +32,12 @@ function addRepresentativeToAvailableList(availableRepresentatives, repId, socke
   } else {
     availableRepresentatives.push({ [repId]: [socketId] });
   }
+  console.log("Representative added to the available list:", repId);
+  console.log("availableRepresentatives", availableRepresentatives.length)
+  for (let userObj of availableRepresentatives) {
+    console.log("availableRepresentatives", Object.keys(userObj))
+  }
 }
 
 exports.handleRepresentativeConnection = handleRepresentativeConnection;
+exports.addRepresentativeToAvailableList = addRepresentativeToAvailableList;

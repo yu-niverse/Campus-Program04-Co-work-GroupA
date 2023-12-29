@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import socket from "../socket";
 import { Chat } from "../components/chat";
 
+
 const ChatPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({});
@@ -18,10 +19,14 @@ const ChatPage = () => {
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log("user", user);
     setUser(user);
-    if (user?.id) {
+    if (user?.id && socket) {
       socket.emit("user_join", user);
+    }
+
+    return () => {
+      console.log("client disconnect");
+      socket.disconnect();
     }
   }, []);
 
