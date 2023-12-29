@@ -141,9 +141,10 @@ const ProductDetails = ({ data, productId }) => {
             const res = await axios.get(
                 `${backendUrl}/collection/check?userId=${userId}&productId=${productId}`
             );
+
             return res.data;
         } catch (error) {
-            console.log(error);
+            return { userLike: false };
         }
     };
 
@@ -153,10 +154,6 @@ const ProductDetails = ({ data, productId }) => {
         queryKey: ["productLike"],
         staleTime: Infinity,
     });
-
-    useEffect(() => {
-        refetch();
-    }, []);
 
     const changeCollection = async (e) => {
         e.preventDefault();
@@ -188,21 +185,26 @@ const ProductDetails = ({ data, productId }) => {
         }
     };
 
+    useEffect(() => {
+        refetch();
+    }, []);
+
     return (
-        <section className="grid grid-cols-12 gap-y-10 mb-12">
-            <div className="relative col-span-12 md:col-span-6 flex justify-center items-center">
-                <button
-                    className="absolute top-0 right-0"
-                    onClick={(e) => {
-                        changeCollection(e);
-                    }}
-                >
-                    {like?.userLike ? (
-                        <FaHeart className="h-8 w-8 text-red-500 hover:scale-110 transition-all duration-300" />
-                    ) : (
-                        <FaRegHeart className="h-8 w-8 hover:scale-110 transition-all duration-300" />
-                    )}
-                </button>
+        <section className="relative grid grid-cols-12 gap-y-10 mb-12">
+            <button
+                className="absolute top-1 -right-8"
+                onClick={(e) => {
+                    changeCollection(e);
+                }}
+            >
+                {like?.userLike ? (
+                    <FaHeart className="h-8 w-8 text-red-500 hover:scale-110 transition-all duration-300" />
+                ) : (
+                    <FaRegHeart className="h-8 w-8 hover:scale-110 transition-all duration-300" />
+                )}
+            </button>
+
+            <div className="col-span-12 md:col-span-6 flex justify-center items-center">
                 <div className="max-h-[750px] overflow-hidden">
                     <img
                         src={main_image || productThumbnail}
@@ -351,8 +353,9 @@ const ProductDetails = ({ data, productId }) => {
 
                     <button
                         type="submit"
-                        className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black"
+                        className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"
                         onClick={addToCart}
+                        disabled={maxAmount === 0}
                     >
                         加入購物車
                     </button>
