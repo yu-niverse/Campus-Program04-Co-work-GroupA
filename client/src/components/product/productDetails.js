@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setCartLength } from "../../features/productsSlice";
 
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+
 import { v4 as uuidv4 } from "uuid";
 
 import productThumbnail from "../../images/product-thumbnail.png";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+
+const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const ProductDetails = ({ data, productId }) => {
     const {
@@ -125,8 +131,79 @@ const ProductDetails = ({ data, productId }) => {
         setMaxAmount(currVariant[0].stock);
     }, [currColor, currSize]);
 
+    // react query
+    // update state on heart icon
+    const checkLike = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        try {
+            const userId = user.id;
+            const res = await axios.get(
+                `${backendUrl}/collection/check?userId=${userId}&productId=${productId}`
+            );
+
+            return res.data;
+        } catch (error) {
+            return { userLike: false };
+        }
+    };
+
+    // check if user like the product
+    const { data: like, refetch } = useQuery({
+        queryFn: checkLike,
+        queryKey: ["productLike"],
+        staleTime: Infinity,
+    });
+
+    const changeCollection = async (e) => {
+        e.preventDefault();
+
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+            alert("Please Sign in First");
+        }
+
+        try {
+            const { id: userId } = user;
+            if (like.userLike) {
+                // remove
+                await axios.delete(`${backendUrl}/collection/remove`, {
+                    data: { userId, productId },
+                });
+            } else {
+                // add
+                await axios.post(`${backendUrl}/collection/add`, {
+                    userId,
+                    productId,
+                });
+            }
+
+            // update state on heart icon
+            refetch();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        refetch();
+    }, []);
+
     return (
-        <section className="grid grid-cols-12 gap-y-10 mb-12">
+        <section className="relative grid grid-cols-12 gap-y-10 mb-12">
+            <button
+                className="absolute top-1 -right-8"
+                onClick={(e) => {
+                    changeCollection(e);
+                }}
+            >
+                {like?.userLike ? (
+                    <FaHeart className="h-8 w-8 text-red-500 hover:scale-110 transition-all duration-300" />
+                ) : (
+                    <FaRegHeart className="h-8 w-8 hover:scale-110 transition-all duration-300" />
+                )}
+            </button>
+
             <div className="col-span-12 md:col-span-6 flex justify-center items-center">
                 <div className="max-h-[750px] overflow-hidden">
                     <img
@@ -142,9 +219,7 @@ const ProductDetails = ({ data, productId }) => {
                     {title}
                 </h2>
 
-                <p className="text-xl text-[#BABABA]">
-                    {new Date().toLocaleString()}
-                </p>
+                <p className="text-xl text-[#BABABA]">{productId}</p>
 
                 <h3 className="text-3xl text-lightBlack">TWD.{price}</h3>
 
@@ -278,8 +353,9 @@ const ProductDetails = ({ data, productId }) => {
 
                     <button
                         type="submit"
-                        className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black"
+                        className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"
                         onClick={addToCart}
+                        disabled={maxAmount === 0}
                     >
                         加入購物車
                     </button>

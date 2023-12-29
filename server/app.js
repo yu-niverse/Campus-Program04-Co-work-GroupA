@@ -2,6 +2,7 @@ require('dotenv').config();
 const morganBody = require('morgan-body');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
+const { startCronJobs } = require('./util/cron');
 const { PORT_TEST, PORT, NODE_ENV, API_VERSION } = process.env;
 const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 
@@ -30,6 +31,8 @@ app.use('/api/' + API_VERSION, rateLimiterRoute, [
     require('./server/routes/user_route'),
     require('./server/routes/order_route'),
     require('./server/routes/seckill_route'),
+    require('./server/routes/line_route'),
+    require('./server/routes/collection_route'),
 ]);
 
 // Page not found
@@ -49,6 +52,7 @@ if (NODE_ENV != 'production') {
             console.log('redis connect fail');
         });
         console.log(`Listening on port: ${port}`);
+        startCronJobs();
     });
 }
 
