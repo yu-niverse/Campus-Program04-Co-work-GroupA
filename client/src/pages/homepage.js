@@ -89,7 +89,7 @@ const Homepage = () => {
             <Carousel />
 
             {isError && (
-                <div className="col-span-12 text-center py-6 my-6 bg-red-500 text-white ">
+                <div className="col-span-12 text-center py-6 mb-32 my-6 bg-red-500 text-white ">
                     No Product Found. Please try another keyword.
                 </div>
             )}

@@ -27,7 +27,7 @@ const createProduct = async (req, res) => {
                 product.id,
                 color_id,
                 size,
-                Math.round(Math.random()*10),
+                Math.round(Math.random() * 10),
             ];
         });
     });
@@ -41,7 +41,7 @@ const createProduct = async (req, res) => {
     if (productId == -1) {
         res.status(500);
     } else {
-        res.status(200).send({productId});
+        res.status(200).send({ productId });
     }
 };
 
@@ -54,37 +54,38 @@ const getProducts = async (req, res) => {
             case 'all':
                 return await Product.getProducts(pageSize, paging);
             case 'men': case 'women': case 'accessories':
-                return await Product.getProducts(pageSize, paging, {category});
+                return await Product.getProducts(pageSize, paging, { category });
             case 'search': {
                 const keyword = req.query.keyword;
                 if (keyword) {
-                    return await Product.getProducts(pageSize, paging, {keyword});
+                    return await Product.getProducts(pageSize, paging, { keyword });
                 }
                 break;
             }
             case 'hot': {
-                return await Product.getProducts(null, null, {category});
+                return await Product.getProducts(null, null, { category });
             }
             case 'details': {
                 const id = parseInt(req.query.id);
                 if (Number.isInteger(id)) {
-                    return await Product.getProducts(pageSize, paging, {id});
+                    return await Product.getProducts(pageSize, paging, { id });
                 }
             }
         }
         return Promise.resolve({});
     }
-    const {products, productCount} = await findProduct(category);
+
+    const { products, productCount } = await findProduct(category);
     if (!products) {
-        res.status(400).send({error:'Wrong Request'});
+        res.status(400).send({ error: 'Wrong Request' });
         return;
     }
 
     if (products.length == 0) {
         if (category === 'details') {
-            res.status(200).json({data: null});
+            res.status(200).json({ data: null });
         } else {
-            res.status(200).json({data: []});
+            res.status(200).json({ data: [] });
         }
         return;
     }

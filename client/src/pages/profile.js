@@ -23,6 +23,7 @@ const Profile = () => {
 
     useEffect(() => {
         const jwtToken = localStorage.getItem("jwtToken");
+
         if (!jwtToken) {
             navigate("/");
             alert("Please Sign in First");
@@ -167,9 +168,10 @@ const Profile = () => {
 
                 {isSuccess && (
                     <ul className="col-start-1 sm:col-start-2 col-span-full sm:col-span-10 mx-3 divide-y divide-solid divide-black">
-                        {collectionDetails?.map((collectionDetail) => {
+                        {collectionDetails?.map((collectionDetail, index) => {
                             return (
                                 <CollectionDetails
+                                    key={`collection-${index}`}
                                     collectionDetail={collectionDetail}
                                     refetch={refetch}
                                 />
