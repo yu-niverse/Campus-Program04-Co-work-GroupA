@@ -1,5 +1,9 @@
 require('dotenv').config();
 const morganBody = require('morgan-body');
+const http = require('http');
+const cors = require('cors');
+const { Server } = require('socket.io');
+const setupSocketEvents = require('./util/socket/socket');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
 const { startCronJobs } = require('./util/cron');
@@ -8,8 +12,21 @@ const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 
 // Express Initialization
 const express = require('express');
-const cors = require('cors');
 const app = express();
+
+// CORS allow all
+app.use(cors());
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:3001', // put the react app url here
+        methods: ['GET', 'POST'],
+    }
+});
+
+setupSocketEvents(io);
 
 app.set('trust proxy', true);
 // app.set('trust proxy', 'loopback');
@@ -18,10 +35,8 @@ app.set('json spaces', 2);
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-morganBody(app);
+// morganBody(app);
 
-// CORS allow all
-app.use(cors());
 
 // API routes
 app.use('/api/' + API_VERSION, rateLimiterRoute, [
@@ -33,6 +48,7 @@ app.use('/api/' + API_VERSION, rateLimiterRoute, [
     require('./server/routes/seckill_route'),
     require('./server/routes/line_route'),
     require('./server/routes/collection_route'),
+    require('./server/routes/message_route'),
 ]);
 
 // Page not found
@@ -47,7 +63,7 @@ app.use(function (err, req, res, next) {
 });
 
 if (NODE_ENV != 'production') {
-    app.listen(port, async () => {
+    server.listen(port, async () => {
         Cache.connect().catch(() => {
             console.log('redis connect fail');
         });
@@ -56,4 +72,4 @@ if (NODE_ENV != 'production') {
     });
 }
 
-module.exports = app;
+module.exports = server;

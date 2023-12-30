@@ -52,6 +52,7 @@
         "redis": "^4.0.4",
         "sinon": "^8.1.1",
         "uuid": "^9.0.1",
+        "socket.io": "^4.7.2",
         "validator": "^13.0.0"
     },
     "devDependencies": {
