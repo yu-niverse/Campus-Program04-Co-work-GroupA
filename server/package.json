@@ -40,6 +40,7 @@
         "express": "^4.17.3",
         "got": "^11.1.4",
         "greenlock-express": "^2.7.18",
+        "ioredis": "^5.3.2",
         "jsonwebtoken": "^8.5.1",
         "mocha": "^7.1.0",
         "morgan-body": "^2.6.6",
@@ -54,6 +55,9 @@
         "winston": "^3.11.0",
         "winston-logstash": "^1.2.1",
         "winston-logstash-transport": "^2.0.0"
+        "uuid": "^9.0.1",
+        "socket.io": "^4.7.2",
+        "validator": "^13.0.0"
     },
     "devDependencies": {
         "eslint": "^8.5.0",

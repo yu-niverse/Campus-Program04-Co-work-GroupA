@@ -1,5 +1,5 @@
 require('dotenv').config();
-const redis = require('redis');
+const redis = require('ioredis');
 const { CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD } = process.env;
 
 const redisClient = redis.createClient({
