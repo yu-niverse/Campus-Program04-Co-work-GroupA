@@ -50,7 +50,10 @@
         "nodemon": "^2.0.4",
         "redis": "^4.0.4",
         "sinon": "^8.1.1",
-        "validator": "^13.0.0"
+        "validator": "^13.0.0",
+        "winston": "^3.11.0",
+        "winston-logstash": "^1.2.1",
+        "winston-logstash-transport": "^2.0.0"
     },
     "devDependencies": {
         "eslint": "^8.5.0",
