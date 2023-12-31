@@ -51,6 +51,10 @@
         "nodemon": "^2.0.4",
         "redis": "^4.0.4",
         "sinon": "^8.1.1",
+        "validator": "^13.0.0",
+        "winston": "^3.11.0",
+        "winston-logstash": "^1.2.1",
+        "winston-logstash-transport": "^2.0.0"
         "uuid": "^9.0.1",
         "socket.io": "^4.7.2",
         "validator": "^13.0.0"
