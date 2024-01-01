@@ -1,2 +1,33 @@
-var amqp = require('amqplib/callback_api');
+const amqp = require("amqplib");
 
+const queue = "product_inventory";
+const text = {
+  item_id: "macbook",
+  text: "This is a sample message to send receiver to check the ordered Item Availablility",
+};
+
+const rabbitMQ = {
+  async sendToQueue() {
+    const queue = "product_inventory";
+    const text = {
+      item_id: "macbook",
+      text: "This is a sample message to send receiver to check the ordered Item Availablility",
+    };
+    let connection;
+    try {
+      connection = await amqp.connect("amqp://localhost:5672");
+      const channel = await connection.createChannel();
+
+      await channel.assertQueue(queue, { durable: false });
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify(text)));
+      console.log(" [x] Sent '%s'", text);
+      await channel.close();
+    } catch (err) {
+      console.warn(err);
+    } finally {
+      if (connection) await connection.close();
+    }
+  },
+}
+
+module.exports = rabbitMQ;

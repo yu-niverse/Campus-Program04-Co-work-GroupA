@@ -4,6 +4,7 @@ const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const setupSocketEvents = require('./util/socket/socket');
+const setupRabbitMQ = require('./rabbitMQ/broker');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
 const { startCronJobs } = require('./util/cron');
@@ -26,7 +27,8 @@ const io = new Server(server, {
     }
 });
 
-setupSocketEvents(io);
+// setupSocketEvents(io);
+setupRabbitMQ(io);
 
 app.set('trust proxy', true);
 // app.set('trust proxy', 'loopback');
