@@ -31,7 +31,7 @@ services:
       timeout: 10s
       retries: 3
     environment:
-      - REDIS_PASSWORD=${CACHE_PASSWORD}
+      - REDIS_URL=redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}
     networks:
       - stylish-net
     env_file:
