@@ -5,15 +5,15 @@ function handleUserConnection(socket, io, user, availableRepresentatives, waitin
   console.log("User connected:", user.name);
   socket.emit('user_connected', { userId });
   socket.isWaiting = true;
-  findCSRorWait(socket, io, availableRepresentatives, waitingUsers);
+  findCSRorWait(io, socket, availableRepresentatives, waitingUsers);
 }
 
-function findCSRorWait(socket, io, availableRepresentatives, waitingUsers) {
+function findCSRorWait(io, socket, availableRepresentatives, waitingUsers) {
   console.log(`User ${socket.userId} is finding representative now`)
   const repObj = getAvailableRepresentative(availableRepresentatives);
   if (repObj) {
     const repId = Object.keys(repObj)[0];
-    console.log("find rep: ", repId)
+    console.log("find rep: ", repObj[repId])
     joinRepresentativeToUserRoom(repObj[repId], socket.userId, io, socket);
     socket.isWaiting = false;
     console.log(`User ${socket.userId} assigned to representative ${repId}`);
