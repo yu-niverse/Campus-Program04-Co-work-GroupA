@@ -1,5 +1,6 @@
 require('dotenv').config();
 const redis = require('ioredis');
+const { logger } = require('./logger');
 const { CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD } = process.env;
 
 const redisClient = redis.createClient({
@@ -13,19 +14,19 @@ redisClient.ready = false;
 
 redisClient.on('ready', () => {
     redisClient.ready = true;
-    console.log('Redis is ready');
+    logger.info('Redis is ready');
 });
 
 redisClient.on('error', () => {
     redisClient.ready = false;
     if (process.env.NODE_ENV == 'production') {
-        console.log('Error in Redis');
+        logger.error('Error connecting to Redis');
     }
 });
 
 redisClient.on('end', () => {
     redisClient.ready = false;
-    console.log('Redis is disconnected');
+    logger.info('Redis connection has closed');
 });
 
 module.exports = redisClient;
