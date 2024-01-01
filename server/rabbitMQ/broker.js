@@ -1,7 +1,7 @@
 const amqp = require('amqplib');
 const Message = require('../server/models/message_model');
-const { handleUserConnection, addUserToWaitingQueue } = require('./customer');
-const { handleRepresentativeConnection, addRepToAvailableQueue } = require('./representative');
+const { handleUserConnection, pairUserWithNextAvailableRepOrAddToQueue } = require('./customer');
+const { handleRepresentativeConnection, pairRepWithNextWaitingCustomerOrAddToQueue } = require('./representative');
 
 async function startRabbitMQ() {
   const connection = await amqp.connect('amqp://localhost:5672');
@@ -44,8 +44,7 @@ function handleDisconnect(socket, io, channel) {
 
 function handleClientDisconnect(userSocket, io, channel) {
   const userId = userSocket.userId;  // The room ID is the user's ID
-  userSocket.leave(userId);
-  console.log(`User ${userId} has disconnected and left the room ${userId}`);
+  console.log(`User ${userId} has disconnected`);
 
   // Check the remaining members in the room
   const room = io.sockets.adapter.rooms.get(userId);
@@ -70,7 +69,7 @@ function handleClientDisconnect(userSocket, io, channel) {
           repSocket.leave(userId);
           repSocket.emit('client_disconnected', userId);
           console.log(`Disconnected representative ${repSocket.id} from room ${userId}`);
-          addRepToAvailableQueue(channel, repSocket);
+          pairRepWithNextWaitingCustomerOrAddToQueue(repSocket, io, channel);
         }
       });
     }
@@ -94,17 +93,19 @@ function handleCSRDisconnect(repSocket, io, channel) {
     });
 
     // If no other representatives are present, remove the users from the room
+    let userSocket;
     if (!otherRepPresent) {
       room.forEach(socketId => {
         const socket = io.sockets.sockets.get(socketId);
         if (socket && socket.userId) {
-          socket.leave(roomId);
-          console.log(`User ${socket.userId} left room ${roomId} due to CSR disconnection`);
           socket.emit('csr_disconnected', roomId);
+          userSocket = socket;
           // Additional logic for re-queueing users can be added here
         }
       });
     }
+    // pair once again
+    pairUserWithNextAvailableRepOrAddToQueue(userSocket, io, channel);
   }
 }
 

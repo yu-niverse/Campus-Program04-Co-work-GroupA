@@ -124,7 +124,9 @@ const ChatBox = () => {
             console.log("assigned_csr", data);
         });
 
-
+        socket.on("csr_disconnected", (data) => {
+            console.log("csr_disconnected", data);
+        });
     }, [socket]);
 
     useEffect(() => {

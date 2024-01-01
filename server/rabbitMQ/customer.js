@@ -10,9 +10,23 @@ function handleUserConnection(user, socket, io, channel) {
   // Mark the user as waiting
   socket.isWaiting = true;
 
+  const isJoined = joinUserRoom(socket, userId, io);
   // Try to pair the user with an available representative
-  pairUserWithNextAvailableRepOrAddToQueue(socket, io, channel);
+  if (!isJoined) {
+    pairUserWithNextAvailableRepOrAddToQueue(socket, io, channel);
+  }
 }
+
+function joinUserRoom(socket, userId, io) {
+  const room = io.sockets.adapter.rooms.get(userId);
+  if (room) {
+    // If the room with the name of userId exists, join the room
+    socket.join(userId);
+    return true;
+  }
+  return false;
+}
+
 
 async function pairUserWithNextAvailableRepOrAddToQueue(userSocket, io, channel) {
   try {
@@ -60,4 +74,4 @@ function addUserToWaitingQueue(channel, userSocket) {
 
 
 exports.handleUserConnection = handleUserConnection;
-exports.addUserToWaitingQueue = addUserToWaitingQueue;
+exports.pairUserWithNextAvailableRepOrAddToQueue = pairUserWithNextAvailableRepOrAddToQueue;
