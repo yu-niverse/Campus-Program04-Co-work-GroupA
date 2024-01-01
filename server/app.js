@@ -10,6 +10,7 @@ const Cache = require('./util/cache');
 const { startCronJobs } = require('./util/cron');
 const { PORT_TEST, PORT, NODE_ENV, API_VERSION } = process.env;
 const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
+const { logger, loggerStream } = require('./util/logger');
 
 // Express Initialization
 const express = require('express');
@@ -37,7 +38,11 @@ app.set('json spaces', 2);
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// morganBody(app);
+morganBody(app, {
+    noColors: true, 
+    prettify: false,
+    stream: loggerStream }
+);
 
 
 // API routes
@@ -47,6 +52,7 @@ app.use('/api/' + API_VERSION, rateLimiterRoute, [
     require('./server/routes/marketing_route'),
     require('./server/routes/user_route'),
     require('./server/routes/order_route'),
+    require('./server/routes/seckill_route'),
     require('./server/routes/line_route'),
     require('./server/routes/collection_route'),
     require('./server/routes/message_route'),
@@ -59,16 +65,16 @@ app.use(function (req, res, next) {
 
 // Error handling
 app.use(function (err, req, res, next) {
-    console.log(err);
+    logger.error(err.message)
     res.status(500).send('Internal Server Error');
 });
 
 if (NODE_ENV != 'production') {
     server.listen(port, async () => {
         Cache.connect().catch(() => {
-            console.log('redis connect fail');
+            logger.error('Cache connection failed');
         });
-        console.log(`Listening on port: ${port}`);
+        logger.info(`Listening on port: ${port}`);
         startCronJobs();
     });
 }
