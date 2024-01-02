@@ -29,6 +29,9 @@ services:
       retries: 3
     networks:
       - stylish-net
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${CACHE_PASSWORD}
+    ports:
+      - ${CACHE_PORT}:${CACHE_PORT}
     env_file:
       - .env
 

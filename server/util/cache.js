@@ -9,7 +9,6 @@ const redisClient = new redis.Redis({
     port: CACHE_PORT,
     host: CACHE_HOST,
     password: CACHE_PASSWORD,
-    username: CACHE_USER,
     db: 0,
 });
 
@@ -18,7 +17,7 @@ redisClient.on('connect', () => {
 });
 
 redisClient.on('error', (err) => {
-    logger.error('Redis client error', err);
+    logger.error('Redis client error:', err);
 });
 
 module.exports = redisClient;
