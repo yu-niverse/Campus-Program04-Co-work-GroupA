@@ -8,8 +8,6 @@ import {
     Checkout,
     Thankyou,
     Profile,
-    ChatPage,
-    AdminChatPage,
     Admin,
     SeckillProduct
 } from "./pages";
@@ -28,8 +26,6 @@ const App = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/thankyou" element={<Thankyou />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/adminchatpage" element={<AdminChatPage />} />
                 <Route path="/admin" element={<Admin />} />
             </Routes>
 
