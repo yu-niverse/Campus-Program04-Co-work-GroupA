@@ -3,6 +3,8 @@ const redis = require('ioredis');
 const { logger } = require('./logger');
 const { CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD } = process.env;
 
+logger.debug(CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD);
+
 const redisClient = redis.createClient({
     url: `redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}`,
     socket: {

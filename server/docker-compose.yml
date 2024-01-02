@@ -18,9 +18,8 @@ services:
       - stylish-net
 
   redis:
-    restart: always
     container_name: ${REDIS_HOST}
-    image: redis:alpine
+    image: redis:latest
     ports:
       - ${CACHE_PORT}:${CACHE_PORT}
     volumes:
