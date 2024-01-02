@@ -92,6 +92,7 @@ const Profile = () => {
             const { data: collections } = await axios.get(
                 `${backendUrl}/collection/getAll/${userId}`
             );
+
             const collectionDetails = await getProductDetails(collections);
             return collectionDetails;
         } catch (error) {
@@ -107,10 +108,16 @@ const Profile = () => {
 
         for (const collection of collections) {
             const { product_id: productId } = collection;
+            console.log(collection);
             const url = `${backendUrl}/products/details?id=${productId}`;
             try {
                 const res = await axios.get(url);
                 const { data: detail } = res.data;
+
+                if (!detail) {
+                    continue;
+                }
+
                 result.push(detail);
             } catch (error) {
                 console.log(error);
