@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { setIsSign } from "../../features/triggerSlice";
+import { setIsSign, setIsAdmin } from "../../features/triggerSlice";
 
 import axios from "axios";
 
@@ -13,6 +13,25 @@ const Signin = () => {
     const { isSign } = useSelector((state) => state.triggerSlice);
 
     const [formAction, setFormAction] = useState("");
+
+    const checkIsAdmin = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        if (!user) {
+            return;
+        }
+
+        try {
+            const { data } = await axios.get(
+                `${process.env.REACT_APP_BACKEND_URL}/api/1.0/user/isAdmin?userId=${user.id}`
+            );
+
+            dispatch(setIsAdmin(data.isAdmin));
+        } catch (error) {
+            console.log(error);
+            dispatch(setIsAdmin(false));
+        }
+    };
 
     const signIn = async (email, password) => {
         const url = `${process.env.REACT_APP_BACKEND_URL}/api/1.0/user/signin`;
@@ -32,6 +51,7 @@ const Signin = () => {
 
                 navigate("/profile");
                 dispatch(setIsSign(false));
+                checkIsAdmin();
             }
         } catch (error) {
             const { status } = error.response;

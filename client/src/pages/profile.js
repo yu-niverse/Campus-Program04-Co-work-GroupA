@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useDispatch } from "react-redux";
+import { setIsAdmin } from "../features/triggerSlice";
+
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+
 import { CollectionDetails, Skeleton } from "../components/profile";
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const Profile = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [user, setUser] = useState({});
     const [isLineNotifyOn, setIsLineNotifyOn] = useState(false);
 
@@ -16,6 +23,7 @@ const Profile = () => {
 
         localStorage.removeItem("user");
         localStorage.removeItem("jwtToken");
+        dispatch(setIsAdmin(false));
 
         navigate("/");
         alert("Sign Out");
@@ -84,6 +92,7 @@ const Profile = () => {
             const { data: collections } = await axios.get(
                 `${backendUrl}/collection/getAll/${userId}`
             );
+
             const collectionDetails = await getProductDetails(collections);
             return collectionDetails;
         } catch (error) {
@@ -99,10 +108,16 @@ const Profile = () => {
 
         for (const collection of collections) {
             const { product_id: productId } = collection;
+            console.log(collection);
             const url = `${backendUrl}/products/details?id=${productId}`;
             try {
                 const res = await axios.get(url);
                 const { data: detail } = res.data;
+
+                if (!detail) {
+                    continue;
+                }
+
                 result.push(detail);
             } catch (error) {
                 console.log(error);
@@ -137,24 +152,26 @@ const Profile = () => {
                 <p className="col-span-full text-center text-base">
                     {user?.email}
                 </p>
-                <button
-                    onClick={isLineNotifyOn ? handleRevoke : handleNotify}
-                    className={`${
-                        isLineNotifyOn
-                            ? "additional-class-for-on"
-                            : "additional-class-for-off"
-                    } col-start-6 col-span-2 text-center text-base border-2 px-4 py-2 rounded-2xl hover:text-white hover:bg-black transition-all duration-300`}
-                >
-                    {`Turn ${isLineNotifyOn ? "Off" : "On"} Line Notify`}
-                </button>
-                <button
-                    className="col-start-4 sm:col-start-5 xl:col-start-6 col-span-6 sm:col-span-4 xl:col-span-2 p-1 border border-solid border-black rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
-                    onClick={(e) => {
-                        signOut(e);
-                    }}
-                >
-                    Sign Out
-                </button>
+                <section className="col-span-full grid grid-cols-12 gap-x-3 mx-6">
+                    <button
+                        onClick={isLineNotifyOn ? handleRevoke : handleNotify}
+                        className={`${
+                            isLineNotifyOn
+                                ? "additional-class-for-on"
+                                : "additional-class-for-off"
+                        } col-start-1 sm:col-start-3 xl:col-start-5 col-span-6 sm:col-span-4 xl:col-span-2 p-1 text-center text-base border rounded-2xl hover:text-white hover:bg-black transition-all duration-300`}
+                    >
+                        {`Turn ${isLineNotifyOn ? "Off" : "On"} Line Notify`}
+                    </button>
+                    <button
+                        className="col-span-6 sm:col-span-4 xl:col-span-2 p-1 text-center text-base border-solid border rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
+                        onClick={(e) => {
+                            signOut(e);
+                        }}
+                    >
+                        Sign Out
+                    </button>
+                </section>
             </section>
 
             <hr className="col-span-full" />
