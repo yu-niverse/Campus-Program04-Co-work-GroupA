@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {wrapAsync} = require('../../util/util');
+const { wrapAsync } = require('../../util/util');
 
 const {
     Seckill, getProducts
@@ -10,7 +10,7 @@ router.route('/seckill/:productId/:userId')
 
 
 router.route('/seckill/:category')
-.get(wrapAsync(getProducts));
+    .get(wrapAsync(getProducts));
 
 
 module.exports = router;

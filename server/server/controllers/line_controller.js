@@ -3,6 +3,7 @@ const path = require('path');
 const querystring = require('querystring');
 const { sendLineNotification, revokeToken } = require('../../util/lineNotification');
 const User = require('../models/user_model');
+const UserSeckill = require('../models/user_seckill_model');
 
 
 const startLineOauth = async (req, res) => {
@@ -131,6 +132,43 @@ const revokeLineNotify = async (req, res) => {
   }
 }
 
+const addNotifyProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.user;
+
+    const result = await UserSeckill.addNotifyProduct(email, id);
+    console.log("db", result);
+    if (result === -1) {
+      return res.status(400).send({ error: 'Already exist' });
+    }
+
+    res.status(200).send({ message: 'ok' });
+
+  } catch (error) {
+    console.error('Error addNotifyProduct:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
+const getNotifyProductandUser = async () => {
+  try {
+    const result = await UserSeckill.getNotifyProductandUser();
+    console.log("rows", result);
+    // send notification
+    for (let i = 0; i < result.length; i++) {
+      const { id: productId, line_notify_token, userId } = result[i];
+      const message = `您訂閱的商品即將開賣，請留意`;
+      sendLineNotification(line_notify_token, null, message);
+      // update database
+      await UserSeckill.removeNotifyProduct(userId, productId);
+    }
+  } catch (error) {
+    console.error('Error getNotifyProductandUser:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
 
 module.exports = {
   startLineOauth,
@@ -138,4 +176,6 @@ module.exports = {
   lineOAuthFailedCallback,
   sendLineNotify,
   revokeLineNotify,
+  addNotifyProduct,
+  getNotifyProductandUser
 }
