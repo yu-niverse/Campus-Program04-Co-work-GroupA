@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useDispatch, useSelector } from "react-redux";
-import { setPaging, setProducts, setUrl } from "../features/productsSlice";
+import {
+    setPaging,
+    setProducts,
+    resetProducts,
+    setUrl,
+} from "../features/productsSlice";
 
 import axios from "axios";
 
@@ -25,11 +30,7 @@ const Homepage = () => {
 
     const fetchData = async () => {
         try {
-            // wait for 1 sec ( to see skeleton loading )
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
             const res = await axios.get(url);
-
             const { data, next_paging } = res.data;
 
             // set next page
@@ -37,13 +38,12 @@ const Homepage = () => {
             dispatch(setProducts(data));
             dispatch(setUrl());
 
-            return data;
+            return products;
         } catch (error) {
             console.log(error);
         }
     };
 
-    //
     const { isLoading, isError, isSuccess, refetch, isFetching } = useQuery({
         queryFn: fetchData,
         queryKey: ["products"],
@@ -52,6 +52,7 @@ const Homepage = () => {
 
     // render product if category / keyword is changed ( by clicking header buttons )
     useEffect(() => {
+        dispatch(resetProducts());
         refetch();
     }, [category, keyword]);
 
@@ -72,7 +73,7 @@ const Homepage = () => {
     useEffect(() => {
         // scroll at bottom
         const isAtBottom =
-            scrollY >= document.body.scrollHeight - window.innerHeight - 100;
+            scrollY >= document.body.scrollHeight - window.innerHeight - 50;
 
         // infinite scroll condition
         // 1. at bottom
@@ -88,14 +89,14 @@ const Homepage = () => {
     }, [scrollY]);
 
     return (
-        <main className="grid grid-cols-12 gap-y-0 gap-x-1 sm:gap-x-5">
+        <main className="grid grid-cols-12 gap-y-0 gap-x-1 sm:gap-x-5 pb-8">
             {/* banner */}
             <Carousel />
 
             <Recommendation />
 
             {isError && (
-                <div className="col-span-12 text-center py-6 my-6 bg-red-500 text-white ">
+                <div className="col-span-12 text-center py-6 mb-32 my-6 bg-red-500 text-white ">
                     No Product Found. Please try another keyword.
                 </div>
             )}

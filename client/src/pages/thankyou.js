@@ -8,7 +8,7 @@ const Thankyou = () => {
     );
 
     return (
-        <div className="grid grid-cols-12 my-10">
+        <div className="grid grid-cols-12 my-10 pb-10">
             <div className="col-start-3 col-span-8 text-center">
                 <h2 className="py-8 bg-green-300 text-3xl">Thank You!</h2>
                 <p className="py-4 text-lg">Order Number - {orderNumber}</p>
