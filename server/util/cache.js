@@ -19,11 +19,9 @@ redisClient.on('ready', () => {
     logger.info('Redis is ready');
 });
 
-redisClient.on('error', () => {
+redisClient.on('error', (err) => {
     redisClient.ready = false;
-    if (process.env.NODE_ENV == 'production') {
-        logger.error('Error connecting to Redis');
-    }
+    logger.error('Error connecting to Redis:', err);
 });
 
 redisClient.on('end', () => {

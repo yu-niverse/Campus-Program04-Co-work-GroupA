@@ -1,21 +1,21 @@
 version: '3'
 services:
-  nginx:
-    image: nginx:latest
-    container_name: ${NGINX_HOST}
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem
-      - /etc/letsencrypt/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem
-    depends_on:
-      - api
-    env_file:
-      - .env
-    networks:
-      - stylish-net
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: ${NGINX_HOST}
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   volumes:
+  #     - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
+  #     - /etc/letsencrypt/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+  #     - /etc/letsencrypt/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem
+  #   depends_on:
+  #     - api
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - stylish-net
 
   redis:
     container_name: ${REDIS_HOST}
