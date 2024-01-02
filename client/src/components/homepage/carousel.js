@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import carousel from "../../data/carousel.json";
-import { SeckillButton } from "./seckillButton"
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -38,7 +39,7 @@ const Carousel = () => {
             setCurrSlideId((prevSlideId) => {
                 return prevSlideId === slides.length - 1 ? 0 : prevSlideId + 1;
             });
-        }, 5000);
+        }, 50000000);
     };
 
     useEffect(() => {
@@ -57,26 +58,42 @@ const Carousel = () => {
             <div className="relative h-[185px] sm:h-[500px] col-span-12 overflow-hidden">
                 {/* switch bg by index in slides */}
                 {/* set "transition-all duration-300" can make the transition smoothly */}
-                <div
-                    style={{
-                        backgroundImage: `url(${slides[currSlideId].url})`,
-                    }}
-                    className="w-full h-full bg-center bg-cover transition-all duration-300 hover:scale-105"
-                    aria-description={slides[currSlideId].alt}
-                ></div>
-                
-                { currSlideId === 5 ? <SeckillButton /> : <article className="absolute top-1/2 left-1/3 xl:left-[22%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                    <h2 className="text-base sm:text-3xl leading-loose sm:leading-[3rem]">
-                        於是
-                        <br />
-                        我也想要給你
-                        <br />
-                        一個那麼美好的自己。
-                    </h2>
-                    <p className="mt-6 text-xs sm:text-xl">
-                        不朽《與自己和好如初》
-                    </p>
-                </article>}
+                {currSlideId === 0 && (
+                    <Link to={"/"}>
+                        <div
+                            style={{
+                                backgroundImage: `url(${slides[currSlideId].url})`,
+                            }}
+                            className="w-full h-full bg-center bg-cover transition-all duration-300 hover:scale-105 hover:cursor-pointer"
+                            aria-description={slides[currSlideId].alt}
+                        ></div>
+                    </Link>
+                )}
+
+                {currSlideId !== 0 && (
+                    <div
+                        style={{
+                            backgroundImage: `url(${slides[currSlideId].url})`,
+                        }}
+                        className="w-full h-full bg-center bg-cover transition-all duration-300"
+                        aria-description={slides[currSlideId].alt}
+                    ></div>
+                )}
+
+                {currSlideId !== 0 && (
+                    <article className="absolute top-1/2 left-1/3 xl:left-[22%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                        <h2 className="text-base sm:text-3xl leading-loose sm:leading-[3rem]">
+                            於是
+                            <br />
+                            我也想要給你
+                            <br />
+                            一個那麼美好的自己。
+                        </h2>
+                        <p className="mt-6 text-xs sm:text-xl">
+                            不朽《與自己和好如初》
+                        </p>
+                    </article>
+                )}
             </div>
 
             {/* left arrow */}
