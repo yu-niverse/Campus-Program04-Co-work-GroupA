@@ -135,7 +135,7 @@ const Header = () => {
                 <nav className="hidden xl:flex justify-center items-center 2xl:col-start-10 xl:col-span-4 2xl:col-span-3 gap-3">
                     {isAdmin === true && (
                         <Link to={"/admin"}>
-                            <MdOutlineAdminPanelSettings className="w-10 h-10 text-red-500" />
+                            <MdOutlineAdminPanelSettings className="w-10 h-10 text-red-500 hover:opacity-75" />
                         </Link>
                     )}
 

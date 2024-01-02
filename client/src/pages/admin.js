@@ -196,69 +196,76 @@ const Admin = () => {
                     {customerId || "No Customer Now"}
                 </h2>
 
-                <ul className="relative h-[80%] px-2 py-3 grid gap-y-5 border border-solid border-black overflow-y-scroll overflow-x-hidden">
-                    {!customerId && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500 text-center font-bold ">
-                            No Customer Now
-                        </div>
-                    )}
+                {isLoading && (
+                    <ul className="animate-pulse h-[80%] px-2 py-3 border border-solid border-black bg-slate-200"></ul>
+                )}
 
-                    {customerId && nextPage && (
-                        <button
-                            className="py-1.5 text-base text-black bg-white border border-solid border-black rounded-lg hover:text-white hover:bg-black transition-all duration-300"
-                            onClick={(e) => {
-                                loadPrevMessage(e);
-                            }}
-                        >
-                            Load previous messages
-                        </button>
-                    )}
+                {isSuccess && (
+                    <ul className="relative h-[80%] px-2 py-3 flex flex-col gap-y-5 border border-solid border-black overflow-y-scroll overflow-x-hidden">
+                        {!customerId && (
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500 text-center font-bold ">
+                                No Customer Now
+                            </div>
+                        )}
 
-                    {messageList?.map((item, index) => {
-                        const { time, sender_role, message } = item;
-                        const isLastMessage = index === messageList.length - 1;
-
-                        return (
-                            <li
-                                key={`message-${index}`}
-                                ref={isLastMessage ? lastMessageRef : null}
-                                className="flex flex-col"
+                        {customerId && nextPage && (
+                            <button
+                                className="py-1.5 text-base text-black bg-white border border-solid border-black rounded-lg hover:text-white hover:bg-black transition-all duration-300"
+                                onClick={(e) => {
+                                    loadPrevMessage(e);
+                                }}
                             >
-                                {sender_role === "representative" ? (
-                                    <div className="grid self-end">
-                                        <span className="relative ml-20 mr-1 px-3 py-1.5 text-white break-all bg-sky-500 rounded-lg after:content-[''] after:absolute after:top-1/2 after:right-0.5 after:w-0 after:h-0 after:border-[10px] after:border-solid after:border-transparent after:border-l-sky-500 after:border-r-0 after:border-t-0 after:-mt-1 after:-mr-2.5">
-                                            {message}
-                                        </span>
-                                        <span className="text-xs text-right">
-                                            {formatDistance(
-                                                new Date(time),
-                                                new Date(),
-                                                {
-                                                    addSuffix: true,
-                                                }
-                                            )}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <div className="grid self-start">
-                                        <span className="relative ml-1 mr-20 px-3 py-1.5 text-white break-all bg-sky-500 rounded-lg after:content-[''] after:absolute after:top-1/2 after:left-0 after:w-0 after:h-0 after:border-[10px] after:border-solid after:border-transparent after:border-r-sky-500 after:border-l-0 after:border-t-0 after:-mt-1 after:-ml-2.5">
-                                            {message}
-                                        </span>
-                                        <span className="text-xs text-left">
-                                            {formatDistance(
-                                                new Date(time),
-                                                new Date(),
-                                                {
-                                                    addSuffix: true,
-                                                }
-                                            )}
-                                        </span>
-                                    </div>
-                                )}
-                            </li>
-                        );
-                    })}
-                </ul>
+                                Load previous messages
+                            </button>
+                        )}
+
+                        {messageList?.map((item, index) => {
+                            const { time, sender_role, message } = item;
+                            const isLastMessage =
+                                index === messageList.length - 1;
+
+                            return (
+                                <li
+                                    key={`message-${index}`}
+                                    ref={isLastMessage ? lastMessageRef : null}
+                                    className="flex flex-col"
+                                >
+                                    {sender_role === "representative" ? (
+                                        <div className="grid self-end">
+                                            <span className="relative ml-20 mr-1 px-3 py-1.5 text-white break-all bg-sky-500 rounded-lg after:content-[''] after:absolute after:top-1/2 after:right-0.5 after:w-0 after:h-0 after:border-[10px] after:border-solid after:border-transparent after:border-l-sky-500 after:border-r-0 after:border-t-0 after:-mt-1 after:-mr-2.5">
+                                                {message}
+                                            </span>
+                                            <span className="text-xs text-right">
+                                                {formatDistance(
+                                                    new Date(time),
+                                                    new Date(),
+                                                    {
+                                                        addSuffix: true,
+                                                    }
+                                                )}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="grid self-start">
+                                            <span className="relative ml-1 mr-20 px-3 py-1.5 text-white break-all bg-sky-500 rounded-lg after:content-[''] after:absolute after:top-1/2 after:left-0 after:w-0 after:h-0 after:border-[10px] after:border-solid after:border-transparent after:border-r-sky-500 after:border-l-0 after:border-t-0 after:-mt-1 after:-ml-2.5">
+                                                {message}
+                                            </span>
+                                            <span className="text-xs text-left">
+                                                {formatDistance(
+                                                    new Date(time),
+                                                    new Date(),
+                                                    {
+                                                        addSuffix: true,
+                                                    }
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
 
                 <form className="relative flex items-end h-[10%]">
                     <textarea
