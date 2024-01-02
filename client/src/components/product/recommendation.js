@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,17 +16,18 @@ import { SwiperButtonNext, SwiperButtonPrevious } from "./swiperButtons";
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 const Recommendation = () => {
-    const [userId, setUserId] = useState(() => {
-        const user = JSON.parse(localStorage.getItem("user"));
-
-        return user?.id || 10242;
-    });
-
     const getRecommendation = async () => {
         try {
-            const { data } = await axios.get(
-                `${backendUrl}/api/1.0/recommendations?userId=${userId}`
-            );
+            let url;
+            const user = JSON.parse(localStorage.getItem("user"));
+
+            if (user) {
+                url = `${backendUrl}/api/1.0/recommendations?userId=${user.id}`;
+            } else {
+                url = `${backendUrl}/api/1.0/recommendations`;
+            }
+
+            const { data } = await axios.get(url);
             const productIds = data.product_id;
 
             let recommendation = [];
@@ -48,11 +49,16 @@ const Recommendation = () => {
         isLoading,
         isSuccess,
         isFetching,
+        refetch,
     } = useQuery({
         queryFn: getRecommendation,
         queryKey: ["recommendation"],
         staleTime: Infinity,
     });
+
+    useEffect(() => {
+        refetch();
+    }, []);
 
     return (
         <div className="col-start-1 xl:col-start-3 col-span-12 xl:col-span-8 my-5">
