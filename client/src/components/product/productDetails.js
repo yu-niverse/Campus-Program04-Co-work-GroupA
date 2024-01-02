@@ -201,7 +201,7 @@ const ProductDetails = ({ data, productId }) => {
             }
         } catch (error) {
             if (error?.response?.data?.error === "Already exist") {
-                alert("Already exist");
+                alert("Already add Line Notification");
             }
         }
     }
