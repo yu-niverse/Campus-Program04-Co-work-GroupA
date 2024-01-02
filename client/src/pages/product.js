@@ -39,7 +39,7 @@ const Product = () => {
 
     useEffect(() => {
         refetch();
-    }, []);
+    }, [id]);
 
     return (
         <main className="grid grid-cols-12 pb-20">
