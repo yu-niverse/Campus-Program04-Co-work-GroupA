@@ -20,8 +20,8 @@ services:
   redis:
     container_name: ${REDIS_HOST}
     image: redis:latest
-    ports:
-      - ${CACHE_PORT}:${CACHE_PORT}
+    # ports:
+    #   - ${CACHE_PORT}:${CACHE_PORT}
     volumes:
       - ./volumes/redis/redis-data:/data
     healthcheck:
@@ -29,8 +29,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 3
-    environment:
-      - REDIS_URL=redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}
+    # environment:
+    #   - REDIS_URL=redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}
     networks:
       - stylish-net
     env_file:
