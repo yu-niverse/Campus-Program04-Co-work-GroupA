@@ -37,11 +37,16 @@ services:
   
   rabbitmq:
     image: "rabbitmq:3-management"
+    container_name: ${RABBITMQ_HOST}
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - 'rabbitmq_data:/data'
+    networks:
+      - stylish-net
+    env_file:
+      - .env
 
   api: 
     image: ${API_IMAGE}
@@ -51,6 +56,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     env_file:
       - .env
     networks:
