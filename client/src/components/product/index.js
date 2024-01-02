@@ -4,4 +4,4 @@ import Skeleton from "./skeleton";
 import Recommendation from "./recommendation";
 import SeckillMoreInfo from "./seckillMoreInfo";
 
-export { MoreInfo, ProductDetails, Skeleton, Recommendation, SeckillMoreInfo };
+export { MoreInfo, ProductDetails, Skeleton, SeckillMoreInfo, Recommendation };
