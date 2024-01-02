@@ -39,7 +39,7 @@ const Carousel = () => {
             setCurrSlideId((prevSlideId) => {
                 return prevSlideId === slides.length - 1 ? 0 : prevSlideId + 1;
             });
-        }, 50000000);
+        }, 5000);
     };
 
     useEffect(() => {
