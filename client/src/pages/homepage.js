@@ -6,7 +6,12 @@ import { setPaging, setProducts, setUrl } from "../features/productsSlice";
 
 import axios from "axios";
 
-import { Carousel, ProductList, Skeleton } from "../components/homepage";
+import {
+    Carousel,
+    ProductList,
+    Skeleton,
+    Recommendation,
+} from "../components/homepage";
 
 const Homepage = () => {
     // redux
@@ -86,6 +91,8 @@ const Homepage = () => {
         <main className="grid grid-cols-12 gap-y-0 gap-x-1 sm:gap-x-5">
             {/* banner */}
             <Carousel />
+
+            <Recommendation />
 
             {isError && (
                 <div className="col-span-12 text-center py-6 my-6 bg-red-500 text-white ">

@@ -6,6 +6,13 @@ import productThumbnail from "../../images/product-thumbnail.png";
 const ProductList = ({ products }) => {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-5 gap-y-12 col-start-1 xl:col-start-3 col-span-12 xl:col-span-8 mt-[4.5rem] mb-24 mx-6">
+            <article className="col-span-full -mb-6">
+                <h2 className="text-3xl font-bold tracking-widest mb-3">
+                    所有商品
+                </h2>
+                <hr />
+            </article>
+
             {products?.map((product) => {
                 const { id, title, price, colors, main_image } = product;
 
