@@ -1,10 +1,11 @@
 function handleRepresentativeConnection(socket, io, availableRepresentatives, waitingUsers, rep) {
   console.log("Representative connected:", socket.id);
   socket.repId = rep.id;
-  findUserOrWait(socket, waitingUsers, availableRepresentatives, rep.id);
+  console.log('repId', rep.id)
+  findUserOrWait(io, socket, waitingUsers, availableRepresentatives, rep.id);
 }
 
-function findUserOrWait(socket, waitingUsers, availableRepresentatives, repId) {
+function findUserOrWait(io, socket, waitingUsers, availableRepresentatives, repId) {
   console.log(`repId ${repId} is finding user now`)
   const userObj = getWaitingUser(waitingUsers);
   if (userObj) {
