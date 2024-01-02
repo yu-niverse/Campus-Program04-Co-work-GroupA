@@ -1,26 +1,22 @@
-const { buyProduct, syncPurchaseDataToDB,getProductInventory,updateStock } = require('../models/seckill_model');
-const { pool } = require('../models/mysqlcon');
+const { getSeckillProducts, getProductsVariants, buyProduct, syncPurchaseDataToDB, getProductInventory, updateStock } = require('../models/seckill_model');
 const redis = require('../../util/cache');
-const schedule = require('node-schedule')
+const schedule = require('node-schedule');
+const _ = require('lodash');
+const util = require('../../util/util');
 
 let isAppInitialized = false;
 
 async function initializeApp(productId) {
     await getProductInventory(productId);
-    const job = schedule.scheduleJob('*/5 * * * * *', async function() {
+    const job = schedule.scheduleJob('*/5 * * * * *', async function () {
         await updateStock(productId);
+        await syncPurchaseDataToDB();
     });
     isAppInitialized = true;
 }
 
-syncPurchaseDataToDB();
-// updateStock(productId);
-
-
-
 async function Seckill(req, res) {
     const { productId, userId } = req.params;
-    console.log('productId', productId);
     const quantity = 1;
     if (!isAppInitialized) {
         await initializeApp(productId);
@@ -45,127 +41,130 @@ async function Seckill(req, res) {
         return 0
       end
     `;
+    try {
+        const result = await redis.eval(script, 0);
+        console.log('result', result);
+        if (result === 1) {
+            const lockResult = await buyProduct(productId, userId, quantity);
+            console.log('lockResult', lockResult);
+            if (lockResult > 0) {
+                const USER_PURCHASE_PREFIX = 'user';
+                const userPurchaseKey = `${USER_PURCHASE_PREFIX}:${userId}:product:${productId}`;
+                await redis.set(userPurchaseKey, 'true');
+            }
 
-    const result = await redis.eval(script, 0);
-    console.log('result', result);
-    if (result === 1) {
-        const lockResult = await buyProduct(productId, userId, quantity);
-        console.log('lockResult', lockResult);
-        if (lockResult > 0) {
-            const USER_PURCHASE_PREFIX = 'user';
-            const userPurchaseKey = `${USER_PURCHASE_PREFIX}:${userId}:product:${productId}`;
-            await redis.set(userPurchaseKey, 'true');
+            return res.json({ success: true, message: `user:${userId} 搶購成功` });
+        } else {
+            console.log({ error: '庫存不足，搶購失敗' });
+            return res.status(400).json({ error: '庫存不足，搶購失敗' });
         }
-
-        return res.json({ success: true, message: `user:${userId} 搶購成功` });
-    } else {
-        console.log({ error: '庫存不足，搶購失敗' });
-        return res.status(400).json({ error: '庫存不足，搶購失敗' });
+    } catch (error) {
+        console.error({ error: error.message });
     }
 }
 
-// async function buyProduct(productId, userId, quantity) {
-//     const userKey = `user:${userId}:product:${productId}`;
-//     const inventoryKey = `product:${productId}:inventory`;
+const pageSize = 6;
+const getProducts = async (req, res) => {
+    const category = req.params.category;
+    const paging = parseInt(req.query.paging) || 0;
 
-//     const multi = redis.multi();
+    async function findProduct(category) {
+        switch (category) {
+            case 'all':
+                return await getSeckillProducts(pageSize, paging);
+            case 'men':
+            case 'women':
+            case 'accessories':
+                return await getSeckillProducts(pageSize, paging, { category });
+            case 'search': {
+                const keyword = req.query.keyword;
+                if (keyword) {
+                    return await getSeckillProducts(pageSize, paging, { keyword });
+                }
+                break;
+            }
+            case 'hot': {
+                return await getSeckillProducts(null, null, { category });
+            }
+            case 'details': {
+                const id = parseInt(req.query.id);
+                if (Number.isInteger(id)) {
+                    return await getSeckillProducts(pageSize, paging, { id });
+                }
+            }
+        }
+        return Promise.resolve({});
+    }
 
-//     // Start the transaction
-//     multi.get(inventoryKey);
-//     multi.decr(inventoryKey);
-//     multi.set(userKey, 'true');
+    const { products, productCount } = await findProduct(category);
+    if (!products) {
+        res.status(400).send({ error: 'Wrong Request' });
+        return;
+    }
 
-//     // Execute the transaction
-//     const results = await multi.exec();
+    if (products.length == 0) {
+        if (category === 'details') {
+            res.status(200).json({ data: null });
+        } else {
+            res.status(200).json({ data: [] });
+        }
+        return;
+    }
 
-//     // Check if the inventory was greater than 0 before decrementing
-//     const inventoryBeforeDecrement = parseInt(results[0][1], 10);
-//     if (inventoryBeforeDecrement >= quantity) {
-//       return quantity; // Success, return the quantity
-//     } else {
-//       return 0; // Failure, not enough inventory
-//     }
-//   }
+    let productsWithDetail = await getProductsWithDetail(req.protocol, req.hostname, products);
 
-// const updateStockQuery = 'UPDATE seckill_variants SET stock = stock - ? WHERE product_id = ?';
-// async function checkAndUpdateStock(productId, quantity) {
-//     const connection = await pool.getConnection();
+    if (category == 'details') {
+        productsWithDetail = productsWithDetail[0];
+    }
 
-//     try {
-//         await connection.beginTransaction();
+    const result =
+        productCount > (paging + 1) * pageSize
+            ? {
+                data: productsWithDetail,
+                next_paging: paging + 1,
+            }
+            : {
+                data: productsWithDetail,
+            };
 
-//         const currentStockQuery = 'SELECT stock FROM seckill_variants WHERE product_id = ?';
-//         const [currentStockResult] = await connection.query(currentStockQuery, [productId]);
-//         const currentStock = currentStockResult[0].stock;
-//         // out of stock
-//         if (currentStock < quantity) {
-//             await connection.rollback();
-//             return false;
-//         }
+    res.status(200).json(result);
+};
 
-//         await connection.query(updateStockQuery, [quantity, productId]);
+const getProductsWithDetail = async (protocol, hostname, products) => {
+    const productIds = products.map((p) => p.id);
+    const variants = await getProductsVariants(productIds);
+    const variantsMap = _.groupBy(variants, (v) => v.product_id);
+    return products.map((p) => {
+        const imagePath = util.getImagePath(protocol, hostname, p.id);
+        p.main_image = p.main_image ? imagePath + p.main_image : null;
+        p.images = p.images ? p.images.split(',').map((img) => imagePath + img) : null;
 
-//         await connection.commit();
-//         return true;
-//     } catch (error) {
-//         await connection.rollback();
-//         throw error;
-//     } finally {
-//         connection.release();
-//     }
-// }
+        const productVariants = variantsMap[p.id];
+        if (!productVariants) {
+            return p;
+        }
 
-// async function Seckill(req, res) {
-//     const { productId, userId } = req.params;
-//     console.log('productId', productId);
-//     const quantity = 1;
-//     const conn = await pool.getConnection();
-//     try {
-//         const getProductInventoryQuery = 'SELECT stock FROM seckill_variants WHERE product_id = ?';
-//         const productRow = await conn.query(getProductInventoryQuery, [productId]);
-//         const stock = productRow[0][0].stock;
-//         console.log('stock', stock);
-//         redis.set(`product:${productId}:inventory`, stock);
-//     } catch (e) {
-//         throw e;
-//     }
+        p.variants = productVariants.map((v) => ({
+            color_code: v.code,
+            size: v.size,
+            stock: v.stock,
+        }));
 
-//     const userKey = `user:${userId}:product:${productId}`;
-//     const hasPurchased = await redis.get(userKey);
+        const allColors = productVariants.map((v) => ({
+            code: v.code,
+            name: v.name,
+        }));
+        p.colors = _.uniqBy(allColors, (c) => c.code);
 
-//     if (hasPurchased) {
-//         return res.status(400).json({ error: '已經搶購過該商品' });
-//     }
+        const allSizes = productVariants.map((v) => v.size);
+        p.sizes = _.uniq(allSizes);
+        return p;
+    });
+};
 
-//     const script = `
-//       local inventory = tonumber(redis.call('get', 'product:${productId}:inventory') or 0)
-//       if inventory > 0 then
-//         redis.call('decr', 'product:${productId}:inventory')
-//         redis.call('set', '${userKey}', 'true')
-//         return 1
-//       else
-//         return 0
-//       end
-//     `;
 
-//     const result = await redis.eval(script, 0);
-
-//     if (result === 1) {
-//         const lockResult = await buyProduct(productId, userId, quantity);
-//         console.log("lockResult",lockResult);
-//         if (lockResult > 0) {
-//             const success = await checkAndUpdateStock(productId, quantity);
-//             if (success) {
-//                 console.log('庫存更新成功');
-//             } else {
-//                 console.log('庫存不足，無法更新');
-//             }
-
-//         }
-//         return res.json({ success: true, message: '搶購成功' });
-//     } else {
-//         return res.status(400).json({ error: '庫存不足，搶購失敗' });
-//     }
-// }
-
-module.exports = { Seckill };
+module.exports = {
+    Seckill,
+    getProducts,
+    getProductsWithDetail,
+};

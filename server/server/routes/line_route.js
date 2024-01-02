@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { wrapAsync } = require('../../util/util');
+const { wrapAsync, authentication } = require('../../util/util');
 
 const {
   lineOAuthSuccessCallback,
@@ -7,6 +7,7 @@ const {
   revokeLineNotify,
   startLineOauth,
   lineOAuthFailedCallback,
+  addNotifyProduct,
 } = require('../controllers/line_controller');
 
 router.route('/start-line-oauth')
@@ -17,9 +18,12 @@ router.route('/line/oauth/callback')
   .post(wrapAsync(lineOAuthSuccessCallback));
 
 router.route('/line/notify')
-  .post(wrapAsync(sendLineNotify));
+  .post(authentication(), wrapAsync(sendLineNotify));
 
 router.route('/line/notify/revoke')
-  .post(wrapAsync(revokeLineNotify));
+  .post(authentication(), wrapAsync(revokeLineNotify));
+
+router.route('/line/notify/product/:id')
+  .post(authentication(), wrapAsync(addNotifyProduct));
 
 module.exports = router;
