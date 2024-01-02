@@ -7,7 +7,7 @@ import Profile from "./profile";
 import ChatPage from "./chatpage";
 import AdminChatPage from "./adminchatpage";
 import Admin from "./admin";
-
+import SeckillProduct from "./seckillproduct";
 export {
     Homepage,
     Layout,
@@ -18,4 +18,5 @@ export {
     ChatPage,
     AdminChatPage,
     Admin,
+    SeckillProduct
 };
