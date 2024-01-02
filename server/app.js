@@ -50,6 +50,7 @@ app.use('/api/' + API_VERSION, rateLimiterRoute, [
     require('./server/routes/marketing_route'),
     require('./server/routes/user_route'),
     require('./server/routes/order_route'),
+    require('./server/routes/recommendation_route'),
     require('./server/routes/seckill_route'),
     require('./server/routes/line_route'),
     require('./server/routes/collection_route'),
