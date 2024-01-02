@@ -11,6 +11,7 @@ import {
     ChatPage,
     AdminChatPage,
     Admin,
+    SeckillProduct
 } from "./pages";
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/product/:id" element={<Product />} />
+                <Route path="/seckill/:id" element={<SeckillProduct />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/thankyou" element={<Thankyou />} />
                 <Route path="/profile" element={<Profile />} />

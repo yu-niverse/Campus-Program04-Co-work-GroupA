@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import carousel from "../../data/carousel.json";
-
+import { SeckillButton } from "./seckillButton"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -64,8 +64,8 @@ const Carousel = () => {
                     className="w-full h-full bg-center bg-cover transition-all duration-300 hover:scale-105"
                     aria-description={slides[currSlideId].alt}
                 ></div>
-
-                <article className="absolute top-1/2 left-1/3 xl:left-[22%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                
+                { currSlideId === 5 ? <SeckillButton /> : <article className="absolute top-1/2 left-1/3 xl:left-[22%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                     <h2 className="text-base sm:text-3xl leading-loose sm:leading-[3rem]">
                         於是
                         <br />
@@ -76,7 +76,7 @@ const Carousel = () => {
                     <p className="mt-6 text-xs sm:text-xl">
                         不朽《與自己和好如初》
                     </p>
-                </article>
+                </article>}
             </div>
 
             {/* left arrow */}

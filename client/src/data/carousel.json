@@ -24,6 +24,11 @@
             "id": 4,
             "url": "/images/banner4.jpg",
             "alt": "banner 4"
+        },
+        {
+            "id": 5,
+            "url": "/images/seckill-banner.png",
+            "alt": "banner 5"
         }
     ]
 }
