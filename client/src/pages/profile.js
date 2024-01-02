@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useDispatch } from "react-redux";
+import { setIsAdmin } from "../features/triggerSlice";
+
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+
 import { CollectionDetails, Skeleton } from "../components/profile";
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
 const Profile = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [user, setUser] = useState({});
     const [isLineNotifyOn, setIsLineNotifyOn] = useState(false);
 
@@ -16,6 +23,7 @@ const Profile = () => {
 
         localStorage.removeItem("user");
         localStorage.removeItem("jwtToken");
+        dispatch(setIsAdmin(false));
 
         navigate("/");
         alert("Sign Out");
@@ -84,6 +92,7 @@ const Profile = () => {
             const { data: collections } = await axios.get(
                 `${backendUrl}/collection/getAll/${userId}`
             );
+
             const collectionDetails = await getProductDetails(collections);
             return collectionDetails;
         } catch (error) {
@@ -99,10 +108,16 @@ const Profile = () => {
 
         for (const collection of collections) {
             const { product_id: productId } = collection;
+            console.log(collection);
             const url = `${backendUrl}/products/details?id=${productId}`;
             try {
                 const res = await axios.get(url);
                 const { data: detail } = res.data;
+
+                if (!detail) {
+                    continue;
+                }
+
                 result.push(detail);
             } catch (error) {
                 console.log(error);

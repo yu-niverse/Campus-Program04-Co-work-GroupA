@@ -87,7 +87,7 @@ const processPendingOrders = async () => {
         const notificationPromises = orders.map(async (order) => {
             if (!order.line_notify_token) {
                 console.error('No line_notify_token found for order ID:', order.id);
-                return;
+                return Order.updateOrderNotificationStatus(pool, order.id);
             }
 
             if (typeof order.details === 'string') {

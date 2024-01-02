@@ -138,8 +138,16 @@ const getUserProfile = async (req, res) => {
     return;
 };
 
+const checkIsAdmin = async (req, res) => {
+    const { userId } = req.query;
+    const isAdmin = await User.isAdmin(userId);
+    res.status(200).send({ isAdmin });
+    return;
+};
+
 module.exports = {
     signUp,
     signIn,
     getUserProfile,
+    checkIsAdmin,
 };

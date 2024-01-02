@@ -70,35 +70,35 @@ async function buyProduct(productId, userId, quantity) {
 }
 
 async function syncPurchaseDataToDB() {
-        const USER_PURCHASE_PREFIX = 'user';
-        const keys = await redis.keys(`${USER_PURCHASE_PREFIX}:*`);
-        const pipeline = redis.pipeline();
-        const connection = await pool.getConnection();
-        for (const key of keys) {
-            try {
-                await pipeline.hgetall(key);
-                const match = key.match(/user:(\d+):product:(\d+)/);
-                const userId = match[1];
-                const productId = match[2];
-                if (match) {
-                    const checkOrderQuery = 'SELECT * FROM order_seckills WHERE userId = ? AND productId = ?';
-                    const [existingOrder] = await connection.execute(checkOrderQuery, [userId, productId]);
-                    // console.log('existing order', userId, productId, existingOrder.length);
-                    if (existingOrder.length < 1) {
-                        await connection.beginTransaction();
-                        const insertQuery = 'INSERT IGNORE INTO order_seckills (userId, productId) VALUES (?, ?)';
-                        console.log("insert to order_seckills", "user:", userId, "product:", productId);
-                        await connection.execute(insertQuery, [userId, productId]);
-                        // await redis.del(key);
-                        await connection.commit();
-                    }
+    const USER_PURCHASE_PREFIX = 'user';
+    const keys = await redis.keys(`${USER_PURCHASE_PREFIX}:*`);
+    const pipeline = redis.pipeline();
+    const connection = await pool.getConnection();
+    for (const key of keys) {
+        try {
+            await pipeline.hgetall(key);
+            const match = key.match(/user:(\d+):product:(\d+)/);
+            const userId = match[1];
+            const productId = match[2];
+            if (match) {
+                const checkOrderQuery = 'SELECT * FROM order_seckills WHERE userId = ? AND productId = ?';
+                const [existingOrder] = await connection.execute(checkOrderQuery, [userId, productId]);
+                // console.log('existing order', userId, productId, existingOrder.length);
+                if (existingOrder.length < 1) {
+                    await connection.beginTransaction();
+                    const insertQuery = 'INSERT IGNORE INTO order_seckills (userId, productId) VALUES (?, ?)';
+                    console.log("insert to order_seckills", "user:", userId, "product:", productId);
+                    await connection.execute(insertQuery, [userId, productId]);
+                    // await redis.del(key);
+                    await connection.commit();
                 }
-            } catch (error) {
-                await connection.rollback();
-                throw error;
-            } finally {
-                connection.release();
             }
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     };
 }
 
