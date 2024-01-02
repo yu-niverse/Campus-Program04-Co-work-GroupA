@@ -141,17 +141,26 @@ function findUserIndex(user_id, inputFile) {
 
 async function getDefault() {
     const query = `
-        SELECT product_id, COUNT(*) as count
-        FROM collections
-        GROUP BY product_id
+        WITH collections AS (
+            SELECT product_id, COUNT(*) AS count
+            FROM collections
+            GROUP BY product_id
+            ORDER BY count DESC
+            LIMIT 6
+        )
+        
+        SELECT oc.product_id, COUNT(*) AS count
+        FROM collections oc
+        JOIN order_table ot ON oc.product_id = JSON_VALUE(ot.details, '$.list[0].id')
+        GROUP BY oc.product_id
         ORDER BY count DESC
         LIMIT 6;
-    `
+    `;
     try {
         const [rows] = await pool.execute(query);
-        return rows.map(row => row.product_id);
-    }
-    catch (error) {
+        console.log(rows);
+        return rows.map((row) => row.product_id);
+    } catch (error) {
         console.error(`Failed to get default recommendations: ${error}`);
     }
 }
@@ -270,7 +279,6 @@ async function main() {
                         });
                 });
 
-                // 使用 Promise.all 等待所有 Promises 完成
                 await Promise.all(promises);
             } catch (error) {
                 console.error(error);
@@ -290,36 +298,40 @@ async function runMain() {
 
 runMain();
 
-
-async function getRecommendations(req,res){
+async function getRecommendations(req, res) {
     const user_id = req.query.userId;
-    
-        const query = `
+    if (!user_id) {
+        const defaultRecommendations = await getDefault();
+        res.status(200).send({
+            user_id,
+            product_id: defaultRecommendations,
+        });
+        return;
+    };
+    const query = `
             SELECT *  FROM recommendations
             WHERE user_id = ?
         `;
-        try {
-            const [rows] = await pool.execute(query, [user_id]);
-            console.log(rows[0]);
+    try {
+        const [rows] = await pool.execute(query, [user_id]);
             const result = {
                 user_id,
-                product_id : rows.map(recommendation => recommendation.product_id)
-            }
-            res.status(200).send(result)
-        } catch (error) {
-            // return default if no recommendations
-            if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-                const defaultRecommendations = await getDefault();
-                res.status(200).send({
-                    user_id,
-                    product_id: defaultRecommendations
-                });
-                return;
-            }
-            console.error(`Failed to get recommendations: ${error}`);
+                product_id: rows.map((recommendation) => recommendation.product_id),
+            };
+        if (result.product_id.length === 0) {
+            const defaultRecommendations = await getDefault();
+            res.status(200).send({
+                user_id,
+                product_id: defaultRecommendations,
+            });
+        } else {
+            res.status(200).send(result);
         }
+    } catch (error) {
+        console.error(`Failed to get recommendations: ${error}`);
+    }
 }
 
 module.exports = {
-    getRecommendations
+    getRecommendations,
 };
