@@ -110,6 +110,27 @@ const Admin = () => {
         }
     };
 
+    const checkIsAdmin = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        if (!user) {
+            return;
+        }
+
+        try {
+            const { data } = await axios.get(
+                `${backendUrl}/user/isAdmin?userId=${user.id}`
+            );
+
+            if (!data.isAdmin) {
+                alert("You Are Not Admin");
+                navigate("/");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
         socket.on("receive_message", (data) => {
             console.log("receive_message", data);
@@ -134,6 +155,8 @@ const Admin = () => {
     }, [socket]);
 
     useEffect(() => {
+        checkIsAdmin();
+
         const jwtToken = localStorage.getItem("jwtToken");
         if (!jwtToken) {
             navigate("/");
