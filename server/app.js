@@ -24,7 +24,7 @@ const io = new Server(server, {
     cors: {
         origin: 'http://localhost:3001', // put the react app url here
         methods: ['GET', 'POST'],
-    }
+    },
 });
 
 setupSocketEvents(io);
@@ -37,11 +37,10 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 morganBody(app, {
-    noColors: true, 
+    noColors: true,
     prettify: false,
-    stream: loggerStream }
-);
-
+    stream: loggerStream,
+});
 
 // API routes
 app.use('/api/' + API_VERSION, rateLimiterRoute, [
@@ -64,7 +63,7 @@ app.use(function (req, res, next) {
 
 // Error handling
 app.use(function (err, req, res, next) {
-    logger.error(err.message)
+    logger.error(err.message);
     res.status(500).send('Internal Server Error');
 });
 
