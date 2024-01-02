@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const USER_ROLE = {
     ALL: -1,
     ADMIN: 1,
-    USER: 2
+    USER: 2,
 };
 
 const signUp = async (name, roleId, email, password) => {
@@ -33,14 +33,17 @@ const signUp = async (name, roleId, email, password) => {
             name: name,
             picture: null,
             access_expired: TOKEN_EXPIRE,
-            login_at: loginAt
+            login_at: loginAt,
         };
-        const accessToken = jwt.sign({
-            provider: user.provider,
-            name: user.name,
-            email: user.email,
-            picture: user.picture
-        }, TOKEN_SECRET);
+        const accessToken = jwt.sign(
+            {
+                provider: user.provider,
+                name: user.name,
+                email: user.email,
+                picture: user.picture,
+            },
+            TOKEN_SECRET
+        );
         user.access_token = accessToken;
 
         const queryStr = 'INSERT INTO user SET ?';
@@ -71,12 +74,15 @@ const nativeSignIn = async (email, password) => {
         }
 
         const loginAt = new Date();
-        const accessToken = jwt.sign({
-            provider: user.provider,
-            name: user.name,
-            email: user.email,
-            picture: user.picture
-        }, TOKEN_SECRET);
+        const accessToken = jwt.sign(
+            {
+                provider: user.provider,
+                name: user.name,
+                email: user.email,
+                picture: user.picture,
+            },
+            TOKEN_SECRET
+        );
 
         const queryStr = 'UPDATE user SET access_token = ?, access_expired = ?, login_at = ? WHERE id = ?';
         await conn.query(queryStr, [accessToken, TOKEN_EXPIRE, loginAt, user.id]);
@@ -108,23 +114,28 @@ const facebookSignIn = async (id, roleId, name, email) => {
             name: name,
             picture: 'https://graph.facebook.com/' + id + '/picture?type=large',
             access_expired: TOKEN_EXPIRE,
-            login_at: loginAt
+            login_at: loginAt,
         };
-        const accessToken = jwt.sign({
-            provider: user.provider,
-            name: user.name,
-            email: user.email,
-            picture: user.picture
-        }, TOKEN_SECRET);
+        const accessToken = jwt.sign(
+            {
+                provider: user.provider,
+                name: user.name,
+                email: user.email,
+                picture: user.picture,
+            },
+            TOKEN_SECRET
+        );
         user.access_token = accessToken;
 
-        const [users] = await conn.query('SELECT id FROM user WHERE email = ? AND provider = \'facebook\' FOR UPDATE', [email]);
+        const [users] = await conn.query("SELECT id FROM user WHERE email = ? AND provider = 'facebook' FOR UPDATE", [email]);
         let userId;
-        if (users.length === 0) { // Insert new user
+        if (users.length === 0) {
+            // Insert new user
             const queryStr = 'insert into user set ?';
             const [result] = await conn.query(queryStr, user);
             userId = result.insertId;
-        } else { // Update existed user
+        } else {
+            // Update existed user
             userId = users[0].id;
             const queryStr = 'UPDATE user SET access_token = ?, access_expired = ?, login_at = ?  WHERE id = ?';
             await conn.query(queryStr, [accessToken, TOKEN_EXPIRE, loginAt, userId]);
@@ -159,12 +170,12 @@ const getUserDetail = async (email, roleId) => {
 const getFacebookProfile = async function (accessToken) {
     try {
         let res = await got('https://graph.facebook.com/me?fields=id,name,email&access_token=' + accessToken, {
-            responseType: 'json'
+            responseType: 'json',
         });
         return res.body;
     } catch (e) {
         console.log(e);
-        throw ('Permissions Error: facebook access token is wrong');
+        throw 'Permissions Error: facebook access token is wrong';
     }
 };
 
@@ -176,7 +187,7 @@ const isLineNotifyToken = async (email) => {
         console.log(e);
         return false;
     }
-}
+};
 
 const saveLineNotifyToken = async (email, token) => {
     try {
@@ -186,7 +197,7 @@ const saveLineNotifyToken = async (email, token) => {
         console.log(e);
         return false;
     }
-}
+};
 
 const revokeLineNotifyToken = async (email) => {
     try {
@@ -196,7 +207,17 @@ const revokeLineNotifyToken = async (email) => {
         console.log(e);
         return false;
     }
-}
+};
+
+const isAdmin = async (userId) => {
+    try {
+        const [result] = await pool.query(`SELECT role_id FROM user WHERE id = ${userId}`);
+        return result[0].role_id === 1;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+};
 
 module.exports = {
     USER_ROLE,
@@ -207,5 +228,6 @@ module.exports = {
     getFacebookProfile,
     saveLineNotifyToken,
     revokeLineNotifyToken,
-    isLineNotifyToken
+    isLineNotifyToken,
+    isAdmin,
 };
