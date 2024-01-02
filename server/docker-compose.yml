@@ -19,7 +19,7 @@ services:
 
   redis:
     restart: always
-    container_name: ${CACHE_HOST}
+    container_name: ${REDIS_HOST}
     image: redis:alpine
     ports:
       - ${CACHE_PORT}:${CACHE_PORT}
