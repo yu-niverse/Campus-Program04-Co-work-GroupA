@@ -4,6 +4,7 @@ const querystring = require('querystring');
 const { sendLineNotification, revokeToken } = require('../../util/lineNotification');
 const User = require('../models/user_model');
 const UserSeckill = require('../models/user_seckill_model');
+const { logger } = require('../../util/logger');
 const { REACT_APP_URL } = process.env;
 
 
@@ -112,8 +113,8 @@ const sendLineNotify = async (req, res) => {
 
 
 const revokeLineNotify = async (req, res) => {
+  const { email } = req.body;
   try {
-    const { email } = req.body;
     // get line_notify_token from database using email
     const user = await User.getUserDetail(email, null);
     const token = user.line_notify_token;
@@ -123,13 +124,19 @@ const revokeLineNotify = async (req, res) => {
       console.error('Error revoking token');
     } else {
       const result = await User.revokeLineNotifyToken(email);
-      console.log("db", result);
+      logger.info("revoke line token", result);
     }
 
     res.send('ok');
   } catch (error) {
-    console.error('Error revokeLineNotify:', error);
-    res.status(500).send('Internal Server Error');
+    if (error?.response?.data?.status === 401) {
+      const result = await User.revokeLineNotifyToken(email);
+      logger.info("revoke line token", result);
+      res.send('ok');
+    } else {
+      console.error('Error revokeLineNotify:', error);
+      res.status(500).send('Internal Server Error');
+    }
   }
 }
 
