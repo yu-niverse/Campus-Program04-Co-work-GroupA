@@ -4,5 +4,18 @@ import Product from "./product";
 import Checkout from "./checkout";
 import Thankyou from "./thankyou";
 import Profile from "./profile";
+import ChatPage from "./chatpage";
+import AdminChatPage from "./adminchatpage";
+import Admin from "./admin";
 
-export { Homepage, Layout, Product, Checkout, Thankyou, Profile };
+export {
+    Homepage,
+    Layout,
+    Product,
+    Checkout,
+    Thankyou,
+    Profile,
+    ChatPage,
+    AdminChatPage,
+    Admin,
+};

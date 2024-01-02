@@ -28,7 +28,7 @@ const Checkout = () => {
     }, [cart, isAmountChange]);
 
     return (
-        <form className="grid grid-cols-12 gap-y-12 mt-12 my-36">
+        <form className="grid grid-cols-12 gap-y-12 pt-10 pb-36">
             <CartInfo
                 cart={cart}
                 setCart={setCart}

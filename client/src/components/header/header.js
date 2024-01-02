@@ -113,11 +113,10 @@ const Header = () => {
                         return (
                             <li key={index}>
                                 <Link
-                                    className={`${
-                                        currCategory === category[1]
+                                    className={`${currCategory === category[1]
                                             ? "after:w-[60%]"
                                             : "after:w-0"
-                                    } relative block ps-4 py-3 xl:py-0 tracking-[1rem] text-gray xl:text-black hover:text-white xl:hover:text-primary after:content-[''] after:absolute after:bottom-1 xl:after:-bottom-1 after:left-[20%] after:border-b-2 after:border-white xl:after:border-black after:transition-all after:duration-300 hover:after:w-[60%]`}
+                                        } relative block ps-4 py-3 xl:py-0 tracking-[1rem] text-gray xl:text-black hover:text-white xl:hover:text-primary after:content-[''] after:absolute after:bottom-1 xl:after:-bottom-1 after:left-[20%] after:border-b-2 after:border-white xl:after:border-black after:transition-all after:duration-300 hover:after:w-[60%]`}
                                     onClick={(e) => {
                                         changeCategory(e, category[1]);
                                     }}
@@ -198,17 +197,16 @@ const Header = () => {
                 {/* mobile search form */}
                 {/* show up smoothly */}
                 <div
-                    className={`col-start-2 sm:col-start-3 col-span-10 sm:col-span-8 transition-all ease-in-out duration-500 ${
-                        isSearching
+                    className={`col-start-2 sm:col-start-3 col-span-10 sm:col-span-8 transition-all ease-in-out duration-500 ${isSearching
                             ? "h-full opacity-100 pointer-events-auto translate-y-0"
                             : "h-0 opacity-0 pointer-events-none -translate-y-5"
-                    }`}
+                        }`}
                 >
                     <form action="" className="flex">
                         <input
                             type="text"
                             name="search"
-                            id="search"
+                            id="search2"
                             placeholder="西裝"
                             className="w-full py-1.5 sm:py-2.5 border-2 border-r-0 border-solid border-[#979797] rounded-s-full indent-4 text-primary focus:outline-none focus:bg-white placeholder:text-primary"
                             onChange={(e) => {
