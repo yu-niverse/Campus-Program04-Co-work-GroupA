@@ -69,9 +69,6 @@ app.use(function (err, req, res, next) {
 
 if (NODE_ENV != 'production') {
     server.listen(port, async () => {
-        Cache.connect().catch(() => {
-            logger.error('Cache connection failed');
-        });
         logger.info(`Listening on port: ${port}`);
         startCronJobs();
     });
