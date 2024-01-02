@@ -137,24 +137,26 @@ const Profile = () => {
                 <p className="col-span-full text-center text-base">
                     {user?.email}
                 </p>
-                <button
-                    onClick={isLineNotifyOn ? handleRevoke : handleNotify}
-                    className={`${
-                        isLineNotifyOn
-                            ? "additional-class-for-on"
-                            : "additional-class-for-off"
-                    } col-start-6 col-span-2 text-center text-base border-2 px-4 py-2 rounded-2xl hover:text-white hover:bg-black transition-all duration-300`}
-                >
-                    {`Turn ${isLineNotifyOn ? "Off" : "On"} Line Notify`}
-                </button>
-                <button
-                    className="col-start-4 sm:col-start-5 xl:col-start-6 col-span-6 sm:col-span-4 xl:col-span-2 p-1 border border-solid border-black rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
-                    onClick={(e) => {
-                        signOut(e);
-                    }}
-                >
-                    Sign Out
-                </button>
+                <section className="col-span-full grid grid-cols-12 gap-x-3 mx-6">
+                    <button
+                        onClick={isLineNotifyOn ? handleRevoke : handleNotify}
+                        className={`${
+                            isLineNotifyOn
+                                ? "additional-class-for-on"
+                                : "additional-class-for-off"
+                        } col-start-1 sm:col-start-3 xl:col-start-5 col-span-6 sm:col-span-4 xl:col-span-2 p-1 text-center text-base border rounded-2xl hover:text-white hover:bg-black transition-all duration-300`}
+                    >
+                        {`Turn ${isLineNotifyOn ? "Off" : "On"} Line Notify`}
+                    </button>
+                    <button
+                        className="col-span-6 sm:col-span-4 xl:col-span-2 p-1 text-center text-base border-solid border rounded-2xl hover:text-white hover:bg-black transition-all duration-300"
+                        onClick={(e) => {
+                            signOut(e);
+                        }}
+                    >
+                        Sign Out
+                    </button>
+                </section>
             </section>
 
             <hr className="col-span-full" />
