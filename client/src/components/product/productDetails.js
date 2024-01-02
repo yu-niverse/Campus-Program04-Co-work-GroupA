@@ -192,7 +192,7 @@ const ProductDetails = ({ data, productId }) => {
     return (
         <section className="relative grid grid-cols-12 gap-y-10 mb-12">
             <button
-                className="absolute top-1 -right-8"
+                className="absolute hidden md:block top-1 -right-8"
                 onClick={(e) => {
                     changeCollection(e);
                 }}
@@ -215,13 +215,30 @@ const ProductDetails = ({ data, productId }) => {
             </div>
 
             <section className="col-start-1 md:col-start-8 col-span-12 md:col-span-5 grid gap-y-4">
-                <h2 className="text-3xl tracking-[0.25rem] text-lightBlack">
+                <h2 className="relative text-xl sm:text-3xl tracking-[0.25rem] text-lightBlack">
                     {title}
+
+                    <button
+                        className="absolute block md:hidden top-1 right-0"
+                        onClick={(e) => {
+                            changeCollection(e);
+                        }}
+                    >
+                        {like?.userLike ? (
+                            <FaHeart className="h-6 xs:h-8 w-6 xs:w-8 text-red-500 hover:scale-110 transition-all duration-300" />
+                        ) : (
+                            <FaRegHeart className="h-6 xs:h-8 w-6 xs:w-8 hover:scale-110 transition-all duration-300" />
+                        )}
+                    </button>
                 </h2>
 
-                <p className="text-xl text-[#BABABA]">{productId}</p>
+                <p className="text-base sm:text-xl text-[#BABABA]">
+                    {productId}
+                </p>
 
-                <h3 className="text-3xl text-lightBlack">TWD.{price}</h3>
+                <h3 className="text-xl sm:text-3xl text-lightBlack">
+                    TWD.{price}
+                </h3>
 
                 <hr />
 
