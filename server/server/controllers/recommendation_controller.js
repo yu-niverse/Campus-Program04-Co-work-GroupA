@@ -2,7 +2,7 @@
 const axios = require('axios');
 const { getAllUsersCollections } = require('../models/collections_model');
 const { pool } = require('../models/mysqlcon');
-const { REACT_APP_URL } = process.env;
+const { API_URL } = process.env;
 
 // const rl = require('readline/promises').createInterface({
 //   input: process.stdin,
@@ -173,7 +173,7 @@ async function main() {
 
         let currentPage = 0;
         do {
-            const response = await axios.get(`${REACT_APP_URL}/api/1.0/products/all?paging=${currentPage}`);
+            const response = await axios.get(`${API_URL}/api/1.0/products/all?paging=${currentPage}`);
             const currentPageProducts = response.data.data.map((product) => product.id);
 
             product_ids.push(...currentPageProducts);
