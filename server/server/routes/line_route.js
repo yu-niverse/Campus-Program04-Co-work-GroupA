@@ -18,10 +18,10 @@ router.route('/line/oauth/callback')
   .post(wrapAsync(lineOAuthSuccessCallback));
 
 router.route('/line/notify')
-  .post(authentication(), wrapAsync(sendLineNotify));
+  .post(wrapAsync(sendLineNotify));
 
 router.route('/line/notify/revoke')
-  .post(authentication(), wrapAsync(revokeLineNotify));
+  .post(wrapAsync(revokeLineNotify));
 
 router.route('/line/notify/product/:id')
   .post(authentication(), wrapAsync(addNotifyProduct));
