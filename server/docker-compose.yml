@@ -34,6 +34,14 @@ services:
       - ${CACHE_PORT}:${CACHE_PORT}
     env_file:
       - .env
+  
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
 
   api: 
     image: ${API_IMAGE}
@@ -51,3 +59,6 @@ services:
 networks:
   stylish-net:
     driver: bridge
+
+volumes:
+  rabbitmq_data:
