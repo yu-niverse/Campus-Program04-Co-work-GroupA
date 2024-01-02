@@ -59,7 +59,7 @@ const Carousel = () => {
                 {/* switch bg by index in slides */}
                 {/* set "transition-all duration-300" can make the transition smoothly */}
                 {currSlideId === 0 && (
-                    <Link to={"/"}>
+                    <Link to={"/seckill/202301051230"}>
                         <div
                             style={{
                                 backgroundImage: `url(${slides[currSlideId].url})`,

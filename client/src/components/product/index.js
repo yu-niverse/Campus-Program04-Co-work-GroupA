@@ -1,5 +1,5 @@
 import MoreInfo from "./moreInfo";
 import ProductDetails from "./productDetails";
 import Skeleton from "./skeleton";
-
-export { MoreInfo, ProductDetails, Skeleton };
+import SeckillMoreInfo from "./seckillMoreInfo"
+export { MoreInfo, ProductDetails, Skeleton, SeckillMoreInfo };
