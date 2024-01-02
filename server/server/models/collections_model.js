@@ -12,7 +12,7 @@ async function getAllUsersCollections() {
 
         return result;
     } catch (error) {
-        console.error("getCollectionsByCondition error", error);
+        console.error("getAllUsersCollections error", error);
         throw error; // Rethrow the error to be handled by the caller
     }
 }

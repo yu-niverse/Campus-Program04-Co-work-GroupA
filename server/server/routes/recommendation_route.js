@@ -6,4 +6,5 @@ const {  getRecommendations } = require('../controllers/recommendation_controlle
 router.route('/recommendations')
     .get(wrapAsync(getRecommendations));
 
+
 module.exports = router;
