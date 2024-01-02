@@ -19,7 +19,7 @@ services:
 
   redis:
     restart: always
-    container_name: ${CACHE_HOST}
+    container_name: ${REDIS_HOST}
     image: redis:alpine
     ports:
       - ${CACHE_PORT}:${CACHE_PORT}
@@ -31,7 +31,7 @@ services:
       timeout: 10s
       retries: 3
     environment:
-      - REDIS_PASSWORD=${CACHE_PASSWORD}
+      - REDIS_URL=redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}
     networks:
       - stylish-net
     env_file:
