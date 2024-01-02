@@ -4,6 +4,7 @@ const querystring = require('querystring');
 const { sendLineNotification, revokeToken } = require('../../util/lineNotification');
 const User = require('../models/user_model');
 const UserSeckill = require('../models/user_seckill_model');
+const { REACT_APP_URL } = process.env;
 
 
 const startLineOauth = async (req, res) => {
@@ -54,7 +55,7 @@ const lineOAuthSuccessCallback = async (req, res) => {
   const data = querystring.stringify({
     grant_type: 'authorization_code',
     code: code,
-    redirect_uri: `http://localhost:3000/api/1.0/line/oauth/callback`,
+    redirect_uri: `${REACT_APP_URL}/api/1.0/line/oauth/callback`,
     client_id: process.env.LINE_SERVICE_CLIENT_ID,
     client_secret: process.env.LINE_SERVICE_CLIENT_SECRET
   });

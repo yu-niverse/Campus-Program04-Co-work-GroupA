@@ -8,7 +8,7 @@ const setupRabbitMQ = require('./rabbitMQ/broker');
 const { rateLimiterRoute } = require('./util/ratelimiter');
 const Cache = require('./util/cache');
 const { startCronJobs } = require('./util/cron');
-const { PORT_TEST, PORT, NODE_ENV, API_VERSION } = process.env;
+const { PORT_TEST, PORT, NODE_ENV, API_VERSION, REACT_APP_URL } = process.env;
 const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 const { logger, loggerStream } = require('./util/logger');
 
@@ -23,7 +23,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3001', // put the react app url here
+        origin: REACT_APP_URL, // put the react app url here
         methods: ['GET', 'POST'],
     },
 });
@@ -71,9 +71,6 @@ app.use(function (err, req, res, next) {
 
 if (NODE_ENV != 'production') {
     server.listen(port, async () => {
-        Cache.connect().catch(() => {
-            logger.error('Cache connection failed');
-        });
         logger.info(`Listening on port: ${port}`);
         startCronJobs();
     });

@@ -1,27 +1,25 @@
 version: '3'
 services:
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: ${NGINX_HOST}
-  #   ports:
-  #     - 80:80
-  #     - 443:443
-  #   volumes:
-  #     - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
-  #     - /etc/letsencrypt/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem
-  #     - /etc/letsencrypt/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem
-  #   depends_on:
-  #     - api
-  #   env_file:
-  #     - .env
-  #   networks:
-  #     - stylish-net
+  nginx:
+    image: nginx:latest
+    container_name: ${NGINX_HOST}
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./volumes/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+      - /etc/letsencrypt/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem
+    depends_on:
+      - api
+    env_file:
+      - .env
+    networks:
+      - stylish-net
 
   redis:
     container_name: ${REDIS_HOST}
     image: redis:latest
-    # ports:
-    #   - ${CACHE_PORT}:${CACHE_PORT}
     volumes:
       - ./volumes/redis/redis-data:/data
     healthcheck:
@@ -29,8 +27,22 @@ services:
       interval: 10s
       timeout: 10s
       retries: 3
-    # environment:
-    #   - REDIS_URL=redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}
+    networks:
+      - stylish-net
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${CACHE_PASSWORD}
+    ports:
+      - ${CACHE_PORT}:${CACHE_PORT}
+    env_file:
+      - .env
+  
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: ${RABBITMQ_HOST}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
     networks:
       - stylish-net
     env_file:
@@ -44,6 +56,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     env_file:
       - .env
     networks:
@@ -52,3 +66,6 @@ services:
 networks:
   stylish-net:
     driver: bridge
+
+volumes:
+  rabbitmq_data:

@@ -2,9 +2,10 @@ const amqp = require('amqplib');
 const Message = require('../server/models/message_model');
 const { handleUserConnection, pairUserWithNextAvailableRepOrAddToQueue } = require('./customer');
 const { handleRepresentativeConnection, pairRepWithNextWaitingCustomerOrAddToQueue } = require('./representative');
+const { RABBITMQ_HOST, RABBITMQ_PORT } = process.env;
 
 async function startRabbitMQ() {
-  const connection = await amqp.connect('amqp://localhost:5672');
+  const connection = await amqp.connect(`amqp://${RABBITMQ_HOST}:${RABBITMQ_PORT}`);
   const channel = await connection.createChannel();
 
   // Declare queues
