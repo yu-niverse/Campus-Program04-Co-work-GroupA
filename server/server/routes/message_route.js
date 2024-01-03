@@ -9,6 +9,6 @@ const { getMessages, getCustomerMessages } = require('../controllers/message_con
 
 router.route('/messages').get(authentication(USER_ROLE.USER), wrapAsync(getMessages));
 
-router.route('/customerMessages').get(authentication(USER_ROLE.USER), wrapAsync(getCustomerMessages));
+router.route('/customerMessages').get(wrapAsync(getCustomerMessages));
 
 module.exports = router;

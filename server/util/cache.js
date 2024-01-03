@@ -5,30 +5,19 @@ const { CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD } = process.env;
 
 logger.debug(CACHE_HOST, CACHE_PORT, CACHE_USER, CACHE_PASSWORD);
 
-const redisClient = redis.createClient({
-    url: `redis://${CACHE_USER}:${CACHE_PASSWORD}@${CACHE_HOST}:${CACHE_PORT}`,
-    socket: {
-        keepAlive: false,
-    },
+const redisClient = new redis.Redis({
+    port: CACHE_PORT,
+    host: CACHE_HOST,
+    password: CACHE_PASSWORD,
+    db: 0,
 });
 
-redisClient.ready = false;
-
-redisClient.on('ready', () => {
-    redisClient.ready = true;
-    logger.info('Redis is ready');
+redisClient.on('connect', () => {
+    logger.info('Redis client connected');
 });
 
-redisClient.on('error', () => {
-    redisClient.ready = false;
-    if (process.env.NODE_ENV == 'production') {
-        logger.error('Error connecting to Redis');
-    }
-});
-
-redisClient.on('end', () => {
-    redisClient.ready = false;
-    logger.info('Redis connection has closed');
+redisClient.on('error', (err) => {
+    logger.error('Redis client error:', err);
 });
 
 module.exports = redisClient;

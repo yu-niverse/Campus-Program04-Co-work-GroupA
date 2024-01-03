@@ -33,13 +33,12 @@ function handleClientDisconnect(clientId, io) {
     for (let socketId of room) {
       const socket = io.sockets.sockets.get(socketId);
       if (socket) {
-        // This is a representative serving the client
         socket.leave(clientId);
         socket.servedUserId = null;
         console.log(`Representative ${socket.id} left room ${clientId}`);
         // You can also notify the representative here, if necessary
         socket.emit('client_disconnected', clientId);
-        findUserOrWait(socket, waitingUsers, availableRepresentatives, socket.repId);
+        findUserOrWait(io, socket, waitingUsers, availableRepresentatives, socket.repId);        // This is a representative serving the client
       }
     }
   }
@@ -56,7 +55,7 @@ function handleCSRDisconnect(clientId, io) {
       if (socket.userId === clientId) {
         socket.leave(clientId);
         socket.isWaiting = true;
-        findCSRorWait(socket, io, availableRepresentatives, waitingUsers);
+        findCSRorWait(io, socket, availableRepresentatives, waitingUsers);
       }
     }
   }

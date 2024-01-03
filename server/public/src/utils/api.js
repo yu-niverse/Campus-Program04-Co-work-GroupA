@@ -1,5 +1,6 @@
+const { REACT_APP_URL } = process.env;
 const api = {
-    hostname: 'http://localhost:3000/api/1.0',
+    hostname: `${REACT_APP_URL}/api/1.0`,
     getProducts(category, paging) {
         return fetch(`${this.hostname}/products/${category}?paging=${paging}`).then((response) => response.json());
     },

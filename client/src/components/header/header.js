@@ -17,12 +17,15 @@ import searchIcon from "../../images/search.png";
 import cart from "../../images/cart.png";
 import member from "../../images/member.png";
 
+import { MdOutlineAdminPanelSettings } from "react-icons/md";
+
 const Header = () => {
     // navigate
     const navigate = useNavigate();
 
     // redux
     const dispatch = useDispatch();
+    const { isAdmin } = useSelector((state) => state.triggerSlice);
     const {
         category: currCategory,
         keyword: currKeyword,
@@ -113,10 +116,11 @@ const Header = () => {
                         return (
                             <li key={index}>
                                 <Link
-                                    className={`${currCategory === category[1]
+                                    className={`${
+                                        currCategory === category[1]
                                             ? "after:w-[60%]"
                                             : "after:w-0"
-                                        } relative block ps-4 py-3 xl:py-0 tracking-[1rem] text-gray xl:text-black hover:text-white xl:hover:text-primary after:content-[''] after:absolute after:bottom-1 xl:after:-bottom-1 after:left-[20%] after:border-b-2 after:border-white xl:after:border-black after:transition-all after:duration-300 hover:after:w-[60%]`}
+                                    } relative block ps-4 py-3 xl:py-0 tracking-[1rem] text-gray xl:text-black hover:text-white xl:hover:text-primary after:content-[''] after:absolute after:bottom-1 xl:after:-bottom-1 after:left-[20%] after:border-b-2 after:border-white xl:after:border-black after:transition-all after:duration-300 hover:after:w-[60%]`}
                                     onClick={(e) => {
                                         changeCategory(e, category[1]);
                                     }}
@@ -129,6 +133,12 @@ const Header = () => {
                 </ul>
 
                 <nav className="hidden xl:flex justify-center items-center 2xl:col-start-10 xl:col-span-4 2xl:col-span-3 gap-3">
+                    {isAdmin === true && (
+                        <Link to={"/admin"}>
+                            <MdOutlineAdminPanelSettings className="w-10 h-10 text-red-500 hover:opacity-75" />
+                        </Link>
+                    )}
+
                     {/* laptop search btn */}
                     <form action="" className="flex">
                         <input
@@ -197,10 +207,11 @@ const Header = () => {
                 {/* mobile search form */}
                 {/* show up smoothly */}
                 <div
-                    className={`col-start-2 sm:col-start-3 col-span-10 sm:col-span-8 transition-all ease-in-out duration-500 ${isSearching
+                    className={`col-start-2 sm:col-start-3 col-span-10 sm:col-span-8 transition-all ease-in-out duration-500 ${
+                        isSearching
                             ? "h-full opacity-100 pointer-events-auto translate-y-0"
                             : "h-0 opacity-0 pointer-events-none -translate-y-5"
-                        }`}
+                    }`}
                 >
                     <form action="" className="flex">
                         <input

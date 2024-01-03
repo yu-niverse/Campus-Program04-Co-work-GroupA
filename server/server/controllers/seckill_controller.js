@@ -120,12 +120,12 @@ const getProducts = async (req, res) => {
     const result =
         productCount > (paging + 1) * pageSize
             ? {
-                  data: productsWithDetail,
-                  next_paging: paging + 1,
-              }
+                data: productsWithDetail,
+                next_paging: paging + 1,
+            }
             : {
-                  data: productsWithDetail,
-              };
+                data: productsWithDetail,
+            };
 
     res.status(200).json(result);
 };
@@ -161,6 +161,7 @@ const getProductsWithDetail = async (protocol, hostname, products) => {
         return p;
     });
 };
+
 
 module.exports = {
     Seckill,
