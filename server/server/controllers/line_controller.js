@@ -4,6 +4,7 @@ const querystring = require('querystring');
 const { sendLineNotification, revokeToken } = require('../../util/lineNotification');
 const User = require('../models/user_model');
 const UserSeckill = require('../models/user_seckill_model');
+const { logger } = require('../../util/logger');
 const { REACT_APP_URL } = process.env;
 
 
@@ -55,7 +56,7 @@ const lineOAuthSuccessCallback = async (req, res) => {
   const data = querystring.stringify({
     grant_type: 'authorization_code',
     code: code,
-    redirect_uri: `${REACT_APP_URL}/api/1.0/line/oauth/callback`,
+    redirect_uri: `${process.env.BACKEND_HOST}/api/1.0/line/oauth/callback`,
     client_id: process.env.LINE_SERVICE_CLIENT_ID,
     client_secret: process.env.LINE_SERVICE_CLIENT_SECRET
   });
@@ -112,8 +113,8 @@ const sendLineNotify = async (req, res) => {
 
 
 const revokeLineNotify = async (req, res) => {
+  const { email } = req.body;
   try {
-    const { email } = req.body;
     // get line_notify_token from database using email
     const user = await User.getUserDetail(email, null);
     const token = user.line_notify_token;
@@ -123,13 +124,19 @@ const revokeLineNotify = async (req, res) => {
       console.error('Error revoking token');
     } else {
       const result = await User.revokeLineNotifyToken(email);
-      console.log("db", result);
+      logger.info("revoke line token", result);
     }
 
     res.send('ok');
   } catch (error) {
-    console.error('Error revokeLineNotify:', error);
-    res.status(500).send('Internal Server Error');
+    if (error?.response?.data?.status === 401) {
+      const result = await User.revokeLineNotifyToken(email);
+      logger.info("revoke line token", result);
+      res.send('ok');
+    } else {
+      console.error('Error revokeLineNotify:', error);
+      res.status(500).send('Internal Server Error');
+    }
   }
 }
 
@@ -159,7 +166,10 @@ const getNotifyProductandUser = async () => {
     // send notification
     for (let i = 0; i < result.length; i++) {
       const { id: productId, line_notify_token, userId } = result[i];
-      const message = `您訂閱的商品即將開賣，請留意`;
+      const message = `
+      您訂閱的商品即將開賣，請留意。\n
+      ${REACT_APP_URL}seckill/${productId}
+      `;
       sendLineNotification(line_notify_token, null, message);
       // update database
       await UserSeckill.removeNotifyProduct(userId, productId);
