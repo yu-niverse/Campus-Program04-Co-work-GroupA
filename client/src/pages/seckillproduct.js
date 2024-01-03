@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import axios from "axios";
-import { SeckillMoreInfo, Skeleton, ProductDetails } from "../components/product";
+import { SeckillMoreInfo, Skeleton, SeckillProductDetails } from "../components/product";
 
 const SeckillProduct = () => {
     window.scrollTo({
@@ -46,7 +46,7 @@ const SeckillProduct = () => {
 
             <div className="col-start-2 xl:col-start-4 col-span-10 xl:col-span-6 gap-x-1 my-12">
                 {(isLoading || isFetching) && <Skeleton />}
-                {isSuccess && <ProductDetails data={data} productId={id} />}
+                {isSuccess && <SeckillProductDetails data={data} productId={id} />}
 
                 <SeckillMoreInfo />
             </div>

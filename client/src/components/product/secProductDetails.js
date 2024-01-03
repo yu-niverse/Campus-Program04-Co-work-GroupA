@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setCartLength } from "../../features/productsSlice";
-
+import StockProgressBar from "./progressBar"
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import io from "socket.io-client";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,7 +16,7 @@ import { addLineNotification } from "./utils/addLineNotification";
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
-const ProductDetails = ({ data, productId }) => {
+const SeckillProductDetails = ({ data, productId }) => {
     const {
         title,
         price,
@@ -34,11 +35,25 @@ const ProductDetails = ({ data, productId }) => {
 
     // state
     const [currColor, setCurrColor] = useState("");
-    const [currColorCode, setCurrColorCode] = useState("");
+    const [currColorCode, setCurrColorCode] = useState("000000");
     const [currSize, setCurrSize] = useState("F");
     const [maxAmount, setMaxAmount] = useState(1);
     const [amount, setAmount] = useState(1);
-
+    useEffect(() => {
+        // 使用 socket.io-client 連接到你的 socket.io 伺服器
+        const socket = io(process.env.REACT_APP_URL);
+    
+        // 註冊事件，監聽 maxAmount 變化
+        socket.on("maxAmountChanged", (newMaxAmount) => {
+          setMaxAmount(newMaxAmount);
+        });
+    
+        // 清理工作，當組件卸載時斷開 socket 連接
+        return () => {
+          socket.disconnect();
+        };
+      }, []); // 注意這個空的依賴陣列，確保只有在組件第一次渲染時註冊事件
+    
     // trigger by color radio
     const colorSelector = (e, code) => {
         setCurrColor(e.target.value);
@@ -340,7 +355,6 @@ const ProductDetails = ({ data, productId }) => {
                                 })}
                             </ul>
                         </li>
-
                         <li key="amount" className="flex items-center gap-x-5">
                             <h4 className="hidden md:block">數量｜</h4>
 
@@ -386,6 +400,11 @@ const ProductDetails = ({ data, productId }) => {
                         </li>
                     </ul>
 
+                    {/* <li className="flex items-center gap-x-5"> */}
+                        <h6 className="text-brown-500">剩餘</h6>
+                        <StockProgressBar currentStock={maxAmount} />
+                    {/* </li>        */}
+                    
                     <button
                         type="submit"
                         className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"
@@ -409,4 +428,4 @@ const ProductDetails = ({ data, productId }) => {
     );
 };
 
-export default ProductDetails;
+export default SeckillProductDetails;
