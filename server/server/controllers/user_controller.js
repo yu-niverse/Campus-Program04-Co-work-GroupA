@@ -1,6 +1,7 @@
 require('dotenv').config();
 const validator = require('validator');
 const User = require('../models/user_model');
+const { logger } = require('../../util/logger.js');
 
 const signUp = async (req, res) => {
     let { name } = req.body;
@@ -141,6 +142,8 @@ const getUserProfile = async (req, res) => {
 const checkIsAdmin = async (req, res) => {
     const { userId } = req.query;
     const isAdmin = await User.isAdmin(userId);
+
+    logger.info(`${isAdmin ? 'Admin sign in' : 'User sign in'}`);
     res.status(200).send({ isAdmin });
     return;
 };
