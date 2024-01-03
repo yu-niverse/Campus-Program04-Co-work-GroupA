@@ -39,20 +39,6 @@ const SeckillProductDetails = ({ data, productId }) => {
     const [currSize, setCurrSize] = useState("F");
     const [maxAmount, setMaxAmount] = useState(1);
     const [amount, setAmount] = useState(1);
-    useEffect(() => {
-        // 使用 socket.io-client 連接到你的 socket.io 伺服器
-        const socket = io(process.env.REACT_APP_URL);
-    
-        // 註冊事件，監聽 maxAmount 變化
-        socket.on("maxAmountChanged", (newMaxAmount) => {
-          setMaxAmount(newMaxAmount);
-        });
-    
-        // 清理工作，當組件卸載時斷開 socket 連接
-        return () => {
-          socket.disconnect();
-        };
-      }, []); // 注意這個空的依賴陣列，確保只有在組件第一次渲染時註冊事件
     
     // trigger by color radio
     const colorSelector = (e, code) => {
@@ -397,14 +383,15 @@ const SeckillProductDetails = ({ data, productId }) => {
                                     +
                                 </button>
                             </div>
-                        </li>
+                        </li>    
                     </ul>
-
-                    {/* <li className="flex items-center gap-x-5"> */}
-                        <h6 className="text-brown-500">剩餘</h6>
+                    <ul >
+                    <li>
+                        <h6 className="text-brown-500">剩餘數量</h6>
                         <StockProgressBar currentStock={maxAmount} />
-                    {/* </li>        */}
-                    
+                    </li>   
+                    </ul>
+                   
                     <button
                         type="submit"
                         className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"

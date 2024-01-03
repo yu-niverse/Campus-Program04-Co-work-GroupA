@@ -7,5 +7,7 @@ export default function StockProgressBar ({ currentStock}) {
     completed={currentStock.toString()} 
     maxCompleted="20"
     bgColor="brown"
+    transitionDuration	="0.2s"
+    transitionTimingFunction="linear"
   />);
 };
