@@ -71,10 +71,14 @@ function getCommonSet(a, b) {
 }
 
 function mean(arr) {
-    let filteredArr = arr.filter((x) => {
-        return x != -1;
-    });
-    return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
+    try {
+        let filteredArr = arr.filter((x) => {
+            return x != -1;
+        });
+        return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
+    } catch (e) {
+        console.log({ error: 'there is no collection with user' });
+    }
 }
 
 function getUserAverages(matrix) {
@@ -289,15 +293,17 @@ async function main() {
         console.log(e);
     }
 }
-
-async function runMain() {
-    while (true) {
-        await main();
-        await new Promise((resolve) => setTimeout(resolve, 1000000));
+try {
+    async function runMain() {
+        while (true) {
+            await main();
+            await new Promise((resolve) => setTimeout(resolve, 1000000));
+        }
     }
+    runMain();
+} catch (error) {
+    console.error('Failed to run main', error);
 }
-
-runMain();
 
 async function getRecommendations(req, res) {
     const user_id = req.query.userId;
@@ -308,17 +314,17 @@ async function getRecommendations(req, res) {
             product_id: defaultRecommendations,
         });
         return;
-    };
+    }
     const query = `
             SELECT *  FROM recommendations
             WHERE user_id = ?
         `;
     try {
         const [rows] = await pool.execute(query, [user_id]);
-            const result = {
-                user_id,
-                product_id: rows.map((recommendation) => recommendation.product_id),
-            };
+        const result = {
+            user_id,
+            product_id: rows.map((recommendation) => recommendation.product_id),
+        };
         if (result.product_id.length === 0) {
             const defaultRecommendations = await getDefault();
             res.status(200).send({

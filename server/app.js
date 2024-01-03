@@ -11,7 +11,6 @@ const { startCronJobs } = require('./util/cron');
 const { PORT_TEST, PORT, NODE_ENV, API_VERSION, REACT_APP_URL } = process.env;
 const port = NODE_ENV == 'test' ? PORT_TEST : PORT;
 const { logger, loggerStream } = require('./util/logger');
-
 // Express Initialization
 const express = require('express');
 const app = express();
@@ -27,7 +26,6 @@ const io = new Server(server, {
         methods: ['GET', 'POST'],
     },
 });
-
 // setupSocketEvents(io);
 setupRabbitMQ(io);
 

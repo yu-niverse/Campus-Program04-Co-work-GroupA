@@ -112,7 +112,6 @@ const getProducts = async (req, res) => {
     }
 
     let productsWithDetail = await getProductsWithDetail(req.protocol, req.hostname, products);
-
     if (category == 'details') {
         productsWithDetail = productsWithDetail[0];
     }

@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setCartLength } from "../../features/productsSlice";
-
+import StockProgressBar from "./progressBar"
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import io from "socket.io-client";
 
 import { v4 as uuidv4 } from "uuid";
 
 import productThumbnail from "../../images/product-thumbnail.png";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import LineLogo from "../../images/line_logo.png";
+import LineLogo from "../../images/line_logo.png"
 
 import { addLineNotification } from "./utils/addLineNotification";
 
 const backendUrl = `${process.env.REACT_APP_BACKEND_URL}/api/1.0`;
 
-const ProductDetails = ({ data, productId }) => {
+const SeckillProductDetails = ({ data, productId }) => {
     const {
         title,
         price,
@@ -34,11 +35,11 @@ const ProductDetails = ({ data, productId }) => {
 
     // state
     const [currColor, setCurrColor] = useState("");
-    const [currColorCode, setCurrColorCode] = useState("");
+    const [currColorCode, setCurrColorCode] = useState("000000");
     const [currSize, setCurrSize] = useState("F");
     const [maxAmount, setMaxAmount] = useState(1);
     const [amount, setAmount] = useState(1);
-
+    
     // trigger by color radio
     const colorSelector = (e, code) => {
         setCurrColor(e.target.value);
@@ -189,20 +190,18 @@ const ProductDetails = ({ data, productId }) => {
 
     useEffect(() => {
         refetch();
-    }, [productId]);
+    }, []);
+
 
     const handleAddLineNotification = async (productId) => {
         try {
             const data = await addLineNotification(productId);
-            if (data) {
-                alert("Add Line Notification Success");
-            }
         } catch (error) {
             if (error?.response?.data?.error === "Already exist") {
-                alert("Already add Line Notification");
+                alert("Already exist");
             }
         }
-    };
+    }
 
     return (
         <section className="relative grid grid-cols-12 gap-y-10 mb-12">
@@ -224,12 +223,7 @@ const ProductDetails = ({ data, productId }) => {
                     handleAddLineNotification(productId);
                 }}
             >
-                <img
-                    src={LineLogo}
-                    width={"32px"}
-                    height={"32px"}
-                    alt="line-logo"
-                />
+                <img src={LineLogo} width={'32px'} height={'32px'} alt="line-logo" />
             </button>
 
             <div className="col-span-12 md:col-span-6 flex justify-center items-center">
@@ -284,10 +278,9 @@ const ProductDetails = ({ data, productId }) => {
                                             <label
                                                 title={name}
                                                 htmlFor={name}
-                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${
-                                                    currColor === name &&
+                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${currColor === name &&
                                                     "outline"
-                                                } `}
+                                                    } `}
                                                 onClick={(e) => {
                                                     colorSelector(e, code);
                                                 }}
@@ -322,11 +315,10 @@ const ProductDetails = ({ data, productId }) => {
                                     return (
                                         <li
                                             key={`size-${size}`}
-                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${
-                                                currSize === size
-                                                    ? "bg-black"
-                                                    : "bg-gray"
-                                            }`}
+                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${currSize === size
+                                                ? "bg-black"
+                                                : "bg-gray"
+                                                }`}
                                         >
                                             <label
                                                 htmlFor={size}
@@ -349,14 +341,12 @@ const ProductDetails = ({ data, productId }) => {
                                 })}
                             </ul>
                         </li>
-
                         <li key="amount" className="flex items-center gap-x-5">
                             <h4 className="hidden md:block">數量｜</h4>
 
                             <div
-                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${
-                                    maxAmount === 0 && "border-red-500"
-                                }`}
+                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${maxAmount === 0 && "border-red-500"
+                                    }`}
                                 title={maxAmount === 0 ? "Sold Out" : ""}
                             >
                                 <button
@@ -393,9 +383,15 @@ const ProductDetails = ({ data, productId }) => {
                                     +
                                 </button>
                             </div>
-                        </li>
+                        </li>    
                     </ul>
-
+                    <ul >
+                    <li>
+                        <h6 className="text-brown-500">剩餘數量</h6>
+                        <StockProgressBar currentStock={maxAmount} />
+                    </li>   
+                    </ul>
+                   
                     <button
                         type="submit"
                         className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"
@@ -419,4 +415,4 @@ const ProductDetails = ({ data, productId }) => {
     );
 };
 
-export default ProductDetails;
+export default SeckillProductDetails;

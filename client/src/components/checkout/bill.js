@@ -74,6 +74,7 @@ const Bill = ({ cart, fee, totalPrice }) => {
             }
 
             const prime = result.card.prime;
+            console.log("prime " + prime);
             const jwtToken = localStorage.getItem("jwtToken");
 
             try {
