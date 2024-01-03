@@ -1,3 +1,5 @@
+const { logger } = require('../util/logger');
+
 function handleUserConnection(user, socket, io, channel) {
   const userId = user.id.toString();
   socket.userId = userId;

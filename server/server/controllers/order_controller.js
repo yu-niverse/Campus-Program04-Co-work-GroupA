@@ -4,6 +4,7 @@ const { TAPPAY_PARTNER_KEY, TAPPAY_MERCHANT_ID } = process.env;
 const Order = require('../models/order_model');
 const { pool } = require('../models/mysqlcon');
 const { sendLineNotification, generateDeliverMessage } = require('../../util/lineNotification');
+const { logger } = require('../../util/logger');
 
 const checkout = async (req, res) => {
     const data = req.body;

@@ -3,6 +3,7 @@ const Message = require('../server/models/message_model');
 const { handleUserConnection, pairUserWithNextAvailableRepOrAddToQueue } = require('./customer');
 const { handleRepresentativeConnection, pairRepWithNextWaitingCustomerOrAddToQueue } = require('./representative');
 const { RABBITMQ_HOST, RABBITMQ_PORT } = process.env;
+const { logger } = require('../util/logger');
 
 async function startRabbitMQ() {
   const connection = await amqp.connect(`amqp://${RABBITMQ_HOST}:${RABBITMQ_PORT}`);
