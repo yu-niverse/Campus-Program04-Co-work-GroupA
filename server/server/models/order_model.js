@@ -12,6 +12,7 @@ const createPayment = async function (orderId, payment) {
         await conn.query('START TRANSACTION');
         await conn.query('INSERT INTO payment SET ?', payment);
         await conn.query('UPDATE order_table SET status = ? WHERE id = ?', [0, orderId]);
+        await conn.query('UPDATE seckill_variants SET stock = stock - 1 ? WHERE product_id = ?', ["202301051230"]);
         await conn.query('COMMIT');
         return true;
     } catch (error) {
