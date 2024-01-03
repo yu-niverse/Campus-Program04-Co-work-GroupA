@@ -3,32 +3,35 @@ const redis = require('../../util/cache');
 const schedule = require('node-schedule');
 const _ = require('lodash');
 const util = require('../../util/util');
+const { logger } = require('../../util/logger');  
+// let isAppInitialized = false;
 
-let isAppInitialized = false;
-
-async function initializeApp(productId) {
-    await getProductInventory(productId);
-    const job = schedule.scheduleJob('*/5 * * * * *', async function () {
-        // await updateStock(productId);
-        await syncPurchaseDataToDB();
-    });
-    isAppInitialized = true;
-}
+// async function initializeApp(productId) {
+//     await getProductInventory(productId);
+//     const job = schedule.scheduleJob('*/5 * * * * *', async function () {
+//         // await updateStock(productId);
+//         await syncPurchaseDataToDB();
+//     });
+//     isAppInitialized = true;
+// }
+const job = schedule.scheduleJob('*/5 * * * * *', async function () {
+    // await updateStock(productId);
+    await syncPurchaseDataToDB();
+});
 
 async function Seckill(req, res) {
     const { productId, userId } = req.params;
     const quantity = 1;
-    if (!isAppInitialized) {
-        await initializeApp(productId);
-    }
+    await getProductInventory(productId);
     try {
         const userKey = `user:${userId}:product:${productId}`;
         const hasPurchased = await redis.get(userKey);
         if (hasPurchased) {
+            logger.error(`user:${userId} 已經搶購過該商品`)
             return res.status(400).json({ error: '已經搶購過該商品' });
         }
     } catch (e) {
-        console.error(e);
+        logger.error("get product in inventory error");
     }
     const userKey = `user:${userId}:product:${productId}`;
     const script = `
@@ -43,10 +46,8 @@ async function Seckill(req, res) {
     `;
     try {
         const result = await redis.eval(script, 0);
-        console.log('result', result);
         if (result === 1) {
             const lockResult = await buyProduct(productId, userId, quantity);
-            console.log('lockResult', lockResult);
             if (lockResult > 0) {
                 const USER_PURCHASE_PREFIX = 'user';
                 const userPurchaseKey = `${USER_PURCHASE_PREFIX}:${userId}:product:${productId}`;
@@ -55,11 +56,11 @@ async function Seckill(req, res) {
 
             return res.json({ success: true, message: `user:${userId} 搶購成功` });
         } else {
-            console.log({ error: '庫存不足，搶購失敗' });
+            logger.error(" error: 庫存不足，搶購失敗");
             return res.status(400).json({ error: '庫存不足，搶購失敗' });
         }
     } catch (error) {
-        console.error({ error: error.message });
+        logger.error(` error: ${error.message} `);
     }
 }
 
