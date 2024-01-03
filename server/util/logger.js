@@ -22,7 +22,7 @@ logger.add(new winston.transports.File({
     format: winston.format.combine(
         winston.format.label({ label: 'api' }),
         winston.format.timestamp(),
-        customFormat
+        winston.format.json()
     ),
 }));
 
