@@ -21,7 +21,7 @@ const checkIsAdmin = async () => {
 
 const initialState = {
     isSign: false,
-    isAdmin: checkIsAdmin(),
+    isAdmin: await checkIsAdmin(),
 };
 
 export const triggerSlice = createSlice({
