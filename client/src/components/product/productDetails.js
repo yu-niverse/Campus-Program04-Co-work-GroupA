@@ -196,9 +196,12 @@ const ProductDetails = ({ data, productId }) => {
     const handleAddLineNotification = async (productId) => {
         try {
             const data = await addLineNotification(productId);
+            if (data) {
+                alert("Add Line Notification Success");
+            }
         } catch (error) {
             if (error?.response?.data?.error === "Already exist") {
-                alert("Already exist");
+                alert("Already add Line Notification");
             }
         }
     }

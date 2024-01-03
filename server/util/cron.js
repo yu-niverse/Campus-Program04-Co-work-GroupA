@@ -6,11 +6,11 @@ const { logger } = require('./logger');
 
 async function startCronJobs() {
   logger.info('start cron jobs');
-  cron.schedule('* * * * *', async () => {
+  cron.schedule('*/30 * * * * *', async () => {
     await OrderController.processPendingOrders();
   });
 
-  cron.schedule('* * * * *', async () => {
+  cron.schedule('*/20 * * * * *', async () => {
     await LineController.getNotifyProductandUser();
   });
 }
