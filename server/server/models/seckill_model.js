@@ -74,8 +74,8 @@ async function syncPurchaseDataToDB() {
     const keys = await redis.keys(`${USER_PURCHASE_PREFIX}:*`);
     const pipeline = redis.pipeline();
     const connection = await pool.getConnection();
-    for (const key of keys) {
-        try {
+    try {
+        for (const key of keys) {
             await pipeline.hgetall(key);
             const match = key.match(/user:(\d+):product:(\d+)/);
             const userId = match[1];
@@ -86,35 +86,34 @@ async function syncPurchaseDataToDB() {
                 // console.log('existing order', userId, productId, existingOrder.length);
                 if (existingOrder.length < 1) {
                     await connection.beginTransaction();
-                    const insertQuery = 'INSERT IGNORE INTO order_seckills (userId, productId) VALUES (?, ?)';
-                    console.log("insert to order_seckills", "user:", userId, "product:", productId);
+                    const insertQuery = 'INSERT IGNORE INTO order_seckills (userId, productId, created) VALUES (?, ?,  NOW())';
+                    console.log('insert to order_seckills', 'user:', userId, 'product:', productId);
                     await connection.execute(insertQuery, [userId, productId]);
-                    // await redis.del(key);
+                    const inventoryKey = `product:${productId}:inventory`;
+                    const currentStock = await redis.get(inventoryKey);
+                    console.log('product:', productId, ' current stock:', currentStock);
+                    const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
+                    await connection.execute(updateStockQuery, [currentStock, productId]);
                     await connection.commit();
                 }
             }
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
         }
-    };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 async function updateStock(productId) {
-    const interval = 10000;
-    async function syncStockToDB() {
-        const inventoryKey = `product:${productId}:inventory`;
-        const currentStock = await redis.get(inventoryKey);
-        console.log('product:', productId, ' current stock:', currentStock);
-        if (currentStock >= 0 && currentStock != null) {
-            const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
-            await pool.query(updateStockQuery, [currentStock, productId]);
-        }
+    const inventoryKey = `product:${productId}:inventory`;
+    const currentStock = await redis.get(inventoryKey);
+    console.log('product:', productId, ' current stock:', currentStock);
+    if (currentStock >= 0 && currentStock != null) {
+        const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
+        await pool.query(updateStockQuery, [currentStock, productId]);
     }
-
-    setInterval(syncStockToDB, interval);
 }
 
 //如果redis沒有庫存資料，就去DB查詢
@@ -133,8 +132,7 @@ async function syncProductInventoryToRedis(productId) {
 async function getProductInventory(productId) {
     const inventoryKey = `product:${productId}:inventory`;
     let stock = await redis.get(inventoryKey);
-    console.log(stock);
-    if (!stock || stock == null) {
+    if (!stock || stock == null || stock===0) {
         await syncProductInventoryToRedis(productId);
         stock = await redis.get(inventoryKey);
     }

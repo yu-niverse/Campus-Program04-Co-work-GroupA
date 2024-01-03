@@ -9,7 +9,7 @@ let isAppInitialized = false;
 async function initializeApp(productId) {
     await getProductInventory(productId);
     const job = schedule.scheduleJob('*/5 * * * * *', async function () {
-        await updateStock(productId);
+        // await updateStock(productId);
         await syncPurchaseDataToDB();
     });
     isAppInitialized = true;
