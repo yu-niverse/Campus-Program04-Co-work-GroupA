@@ -17,12 +17,13 @@ logger.add(new winston.transports.Console({
     ),
 }));
 
+// json format
 logger.add(new winston.transports.File({
     filename: process.env.LOG_FILE || 'server.log',
     format: winston.format.combine(
         winston.format.label({ label: 'api' }),
         winston.format.timestamp(),
-        customFormat
+        winston.format.json()
     ),
 }));
 
