@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import productThumbnail from "../../images/product-thumbnail.png";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import LineLogo from "../../images/line_logo.png"
+import LineLogo from "../../images/line_logo.png";
 
 import { addLineNotification } from "./utils/addLineNotification";
 
@@ -190,8 +190,7 @@ const ProductDetails = ({ data, productId }) => {
 
     useEffect(() => {
         refetch();
-    }, []);
-
+    }, [productId]);
 
     const handleAddLineNotification = async (productId) => {
         try {
@@ -204,7 +203,7 @@ const ProductDetails = ({ data, productId }) => {
                 alert("Already add Line Notification");
             }
         }
-    }
+    };
 
     return (
         <section className="relative grid grid-cols-12 gap-y-10 mb-12">
@@ -226,7 +225,12 @@ const ProductDetails = ({ data, productId }) => {
                     handleAddLineNotification(productId);
                 }}
             >
-                <img src={LineLogo} width={'32px'} height={'32px'} alt="line-logo" />
+                <img
+                    src={LineLogo}
+                    width={"32px"}
+                    height={"32px"}
+                    alt="line-logo"
+                />
             </button>
 
             <div className="col-span-12 md:col-span-6 flex justify-center items-center">
@@ -281,9 +285,10 @@ const ProductDetails = ({ data, productId }) => {
                                             <label
                                                 title={name}
                                                 htmlFor={name}
-                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${currColor === name &&
+                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${
+                                                    currColor === name &&
                                                     "outline"
-                                                    } `}
+                                                } `}
                                                 onClick={(e) => {
                                                     colorSelector(e, code);
                                                 }}
@@ -318,10 +323,11 @@ const ProductDetails = ({ data, productId }) => {
                                     return (
                                         <li
                                             key={`size-${size}`}
-                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${currSize === size
-                                                ? "bg-black"
-                                                : "bg-gray"
-                                                }`}
+                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${
+                                                currSize === size
+                                                    ? "bg-black"
+                                                    : "bg-gray"
+                                            }`}
                                         >
                                             <label
                                                 htmlFor={size}
@@ -349,8 +355,9 @@ const ProductDetails = ({ data, productId }) => {
                             <h4 className="hidden md:block">數量｜</h4>
 
                             <div
-                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${maxAmount === 0 && "border-red-500"
-                                    }`}
+                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${
+                                    maxAmount === 0 && "border-red-500"
+                                }`}
                                 title={maxAmount === 0 ? "Sold Out" : ""}
                             >
                                 <button

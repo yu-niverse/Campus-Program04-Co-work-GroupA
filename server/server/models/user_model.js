@@ -5,6 +5,7 @@ const { pool } = require('./mysqlcon');
 const salt = parseInt(process.env.BCRYPT_SALT);
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env; // 30 days by seconds
 const jwt = require('jsonwebtoken');
+const { logger } = require('../../util/logger.js');
 
 const USER_ROLE = {
     ALL: -1,
@@ -53,7 +54,7 @@ const signUp = async (name, roleId, email, password) => {
         await conn.query('COMMIT');
         return { user };
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         await conn.query('ROLLBACK');
         return { error };
     } finally {
@@ -174,7 +175,7 @@ const getFacebookProfile = async function (accessToken) {
         });
         return res.body;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         throw 'Permissions Error: facebook access token is wrong';
     }
 };
@@ -184,7 +185,7 @@ const isLineNotifyToken = async (email) => {
         const [result] = await pool.query('SELECT line_notify_token FROM user WHERE email = ?', [email]);
         return result[0].line_notify_token !== null;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         return false;
     }
 };
@@ -194,7 +195,7 @@ const saveLineNotifyToken = async (email, token) => {
         const [result] = await pool.query('UPDATE user SET line_notify_token = ? WHERE email = ?', [token, email]);
         return result.affectedRows === 1;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         return false;
     }
 };
@@ -204,7 +205,7 @@ const revokeLineNotifyToken = async (email) => {
         const [result] = await pool.query('UPDATE user SET line_notify_token = null WHERE email = ?', [email]);
         return result.affectedRows === 1;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         return false;
     }
 };
@@ -214,7 +215,7 @@ const isAdmin = async (userId) => {
         const [result] = await pool.query(`SELECT role_id FROM user WHERE id = ${userId}`);
         return result[0].role_id === 1;
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         return false;
     }
 };

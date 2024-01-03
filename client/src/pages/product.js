@@ -51,7 +51,9 @@ const Product = () => {
 
             <div className="col-start-2 xl:col-start-4 col-span-10 xl:col-span-6 gap-x-1 my-12">
                 {(isLoading || isFetching) && <Skeleton />}
-                {isSuccess && <ProductDetails data={data} productId={id} />}
+                {!(isLoading || isFetching) && isSuccess && (
+                    <ProductDetails data={data} productId={id} />
+                )}
 
                 <Recommendation />
 

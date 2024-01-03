@@ -5,7 +5,7 @@ const checkIsAdmin = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (!user) {
-        return;
+        return false;
     }
 
     try {
@@ -21,7 +21,7 @@ const checkIsAdmin = async () => {
 
 const initialState = {
     isSign: false,
-    isAdmin: checkIsAdmin(),
+    isAdmin: await checkIsAdmin(),
 };
 
 export const triggerSlice = createSlice({
