@@ -45,7 +45,6 @@ const checkout = async (req, res) => {
     const deliveryDate = new Date();
     // deliveryDate.setMinutes(deliveryDate.getMinutes() + 1);
 
-    console.log("timetime", deliveryDate.getTime());
     await Order.setDeliveryDate(orderId, deliveryDate.getTime());
 
     res.send({ data: { number } });
@@ -108,10 +107,10 @@ const sendNotificationAndUpdate = async (order) => {
         connection = await pool.getConnection();
         await connection.beginTransaction();
         const message = await generateDeliverMessage(order);
-        console.log('order_id:', order.id, 'sent');
         await sendLineNotification(order.line_notify_token, null, message);
         await Order.updateOrderNotificationStatus(connection, order.id);
         await connection.commit();
+        logger.info(`order_id: ${order.id} line notification sent`)
     } catch (error) {
         if (connection) {
             await connection.rollback();

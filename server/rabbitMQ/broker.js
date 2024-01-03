@@ -28,12 +28,12 @@ module.exports = async function (io) {
 };
 
 function handleConnection(socket) {
-  // console.log("connected:", socket.id);
+  // logger.info("connected:", socket.id);
 }
 
 function handleDisconnect(socket, io, channel) {
   socket.on('disconnect', () => {
-    console.log("disconnected:", socket.id, socket.userId, socket.repId);
+    logger.info("disconnected:", socket.id, socket.userId, socket.repId);
     if (socket.userId) {
       handleClientDisconnect(socket, io, channel);
     } else if (socket.repId) {
@@ -45,7 +45,7 @@ function handleDisconnect(socket, io, channel) {
 
 function handleClientDisconnect(userSocket, io, channel) {
   const userId = userSocket.userId;  // The room ID is the user's ID
-  console.log(`User ${userId} has disconnected`);
+  logger.info(`User ${userId} has disconnected`);
 
   // Check the remaining members in the room
   const room = io.sockets.adapter.rooms.get(userId);
@@ -69,7 +69,7 @@ function handleClientDisconnect(userSocket, io, channel) {
         if (repSocket) {
           repSocket.leave(userId);
           repSocket.emit('client_disconnected', userId);
-          console.log(`Disconnected representative ${repSocket.id} from room ${userId}`);
+          logger.info(`Disconnected representative ${repSocket.id} from room ${userId}`);
           pairRepWithNextWaitingCustomerOrAddToQueue(repSocket, io, channel);
         }
       });
@@ -80,7 +80,7 @@ function handleClientDisconnect(userSocket, io, channel) {
 
 function handleCSRDisconnect(repSocket, io, channel) {
   const roomId = repSocket.servedUserId; // Assuming the room ID is stored in `repId`
-  console.log("CSR disconnected:", roomId);
+  logger.info("CSR disconnected:", roomId);
 
   const room = io.sockets.adapter.rooms.get(roomId);
   if (room) {

@@ -1,6 +1,8 @@
+const { logger } = require('../util/logger');
+
 function handleRepresentativeConnection(rep, socket, io, channel) {
   socket.repId = rep.id;
-  console.log("Rep connected:", rep.name, socket.id);
+  logger.info("Rep connected:", rep.name, socket.id);
 
   // Emit to the rep that they are connected
   socket.emit('rep_connected', { repId: rep.id });
@@ -37,9 +39,9 @@ function attemptToPairWithCustomer(repSocket, customerDetails, io, channel) {
     repSocket.servedUserId = customerId;
     repSocket.emit('assigned_user', { userId: customerId });
 
-    console.log(`Pairing rep ${repSocket.repId} ${repSocket.id} with customer ${customerId}`);
+    logger.info(`Pairing rep ${repSocket.repId} ${repSocket.id} with customer ${customerId}`);
   } else {
-    console.log(`Customer ${customerId} is no longer connected. Checking for next waiting customer.`);
+    logger.info(`Customer ${customerId} is no longer connected. Checking for next waiting customer.`);
     pairRepWithNextWaitingCustomerOrAddToQueue(repSocket, io, channel);
   }
 }
@@ -50,7 +52,7 @@ function addRepToAvailableQueue(channel, repSocket) {
     socketId: repSocket.id,
   };
   channel.sendToQueue('availableRepresentatives', Buffer.from(JSON.stringify(repConnectionDetails)));
-  console.log(`Representative ${repSocket.repId} added to available queue`);
+  logger.info(`Representative ${repSocket.repId} added to available queue`);
 }
 
 exports.handleRepresentativeConnection = handleRepresentativeConnection;

@@ -1,5 +1,6 @@
 const { pool } = require('./mysqlcon');
 const User = require('./user_model');
+const { logger } = require('../../util/logger');
 
 const addNotifyProduct = async (email, productId) => {
   // start transaction
@@ -18,7 +19,7 @@ const addNotifyProduct = async (email, productId) => {
       const sql = 'INSERT INTO user_product_notify (userId, productId) VALUES (?, ?)';
       const [rows] = await connection.query(sql, [userId, productId]);
       await connection.query('COMMIT');
-      console.log("rows", rows);
+      logger.info(`Added notify product ${productId} for user ${userId}`);
       return rows.affectedRows;
     }
   } catch (error) {

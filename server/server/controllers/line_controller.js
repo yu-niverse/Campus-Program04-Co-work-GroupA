@@ -30,12 +30,10 @@ const lineOAuthFailedCallback = (req, res) => {
   const { error, error_description, state } = req.query;
   try {
     if (error) {
-      console.error('Error lineOAuthCallback:', error);
-      console.log('Error: ' + error_description);
+      logger.error('Error lineOAuthCallback:', error_description);
       const decodedState = Buffer.from(state, 'base64').toString('utf-8');
       const stateObj = JSON.parse(decodedState);
       const originalUrl = stateObj.originalUrl; // The URL to redirect the user back to
-      console.log('decodedState', decodedState, originalUrl);
       return res.redirect(originalUrl);
     }
   } catch (error) {
@@ -69,7 +67,6 @@ const lineOAuthSuccessCallback = async (req, res) => {
     });
 
     const token = response.data.access_token;
-    console.log('token', token);
     if (!token) {
       return res.status(400).send('Cannot get token');
     }
@@ -146,7 +143,6 @@ const addNotifyProduct = async (req, res) => {
     const { email } = req.user;
 
     const result = await UserSeckill.addNotifyProduct(email, id);
-    console.log("db", result);
     if (result === -1) {
       return res.status(400).send({ error: 'Already exist' });
     }
@@ -162,7 +158,6 @@ const addNotifyProduct = async (req, res) => {
 const getNotifyProductandUser = async () => {
   try {
     const result = await UserSeckill.getNotifyProductandUser();
-    console.log("rows", result);
     // send notification
     for (let i = 0; i < result.length; i++) {
       const { id: productId, line_notify_token, userId } = result[i];
