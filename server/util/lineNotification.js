@@ -1,6 +1,7 @@
 const FormData = require('form-data');
 const fs = require('fs');
 const axios = require('axios');
+const { logger } = require('./logger');
 
 
 async function sendLineNotification(token, filePath, message) {
@@ -21,7 +22,7 @@ async function sendLineNotification(token, filePath, message) {
     };
 
     const response = await axios.post('https://notify-api.line.me/api/notify', formData, config);
-    console.log('Notification sent successfully:', response.data);
+    logger.info('Notification sent successfully:', response.data);
   } catch (error) {
     // Handle any errors
     console.error('Error sending notification:', error);

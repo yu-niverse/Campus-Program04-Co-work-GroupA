@@ -4,6 +4,7 @@ const { TAPPAY_PARTNER_KEY, TAPPAY_MERCHANT_ID } = process.env;
 const Order = require('../models/order_model');
 const { pool } = require('../models/mysqlcon');
 const { sendLineNotification, generateDeliverMessage } = require('../../util/lineNotification');
+const { logger } = require('../../util/logger');
 
 const checkout = async (req, res) => {
     const data = req.body;
@@ -45,7 +46,6 @@ const checkout = async (req, res) => {
     const deliveryDate = new Date();
     // deliveryDate.setMinutes(deliveryDate.getMinutes() + 1);
 
-    console.log("timetime", deliveryDate.getTime());
     await Order.setDeliveryDate(orderId, deliveryDate.getTime());
 
     res.send({ data: { number } });
@@ -108,10 +108,10 @@ const sendNotificationAndUpdate = async (order) => {
         connection = await pool.getConnection();
         await connection.beginTransaction();
         const message = await generateDeliverMessage(order);
-        console.log('order_id:', order.id, 'sent');
         await sendLineNotification(order.line_notify_token, null, message);
         await Order.updateOrderNotificationStatus(connection, order.id);
         await connection.commit();
+        logger.info(`order_id: ${order.id} line notification sent`)
     } catch (error) {
         if (connection) {
             await connection.rollback();

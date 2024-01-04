@@ -1,8 +1,10 @@
+const { logger } = require('../util/logger');
+
 function handleUserConnection(user, socket, io, channel) {
   const userId = user.id.toString();
   socket.userId = userId;
   socket.name = user.name;
-  console.log(`User connected: ${userId}`, socket.name, " ", socket.id);
+  logger.info(`User connected: ${userId}`, socket.name, " ", socket.id);
 
   // Emit to the user that they are connected
   socket.emit('user_connected', { userId });
@@ -56,9 +58,9 @@ function attemptToPairWithRep(userSocket, repDetails, io, channel) {
     repSocket.servedUserId = userSocket.userId;
     io.in(roomId).emit('assigned_user', { userId: userSocket.userId });
 
-    console.log(`Pairing user ${userSocket.userId} with rep ${repSocket.id} ${repSocket.repId}`);
+    logger.info(`Pairing user ${userSocket.userId} with rep ${repSocket.id} ${repSocket.repId}`);
   } else {
-    console.log(`Representative ${repDetails.repId} is no longer available. Checking for next available rep.`);
+    logger.info(`Representative ${repDetails.repId} is no longer available. Checking for next available rep.`);
     pairUserWithNextAvailableRepOrAddToQueue(userSocket, io, channel);
   }
 }
@@ -69,7 +71,7 @@ function addUserToWaitingQueue(channel, userSocket) {
     socketId: userSocket.id,
   };
   channel.sendToQueue('waitingUsers', Buffer.from(JSON.stringify(userConnectionDetails)));
-  console.log(`User ${userSocket.userId} added to waiting queue`);
+  logger.info(`User ${userSocket.userId} added to waiting queue`);
 }
 
 
