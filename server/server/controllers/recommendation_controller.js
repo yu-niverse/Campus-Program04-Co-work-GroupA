@@ -2,7 +2,7 @@
 const axios = require('axios');
 const { getAllUsersCollections } = require('../models/collections_model');
 const { pool } = require('../models/mysqlcon');
-const { API_URL } = process.env;
+const { logger } = require('../../util/logger');
 
 // const rl = require('readline/promises').createInterface({
 //   input: process.stdin,
@@ -77,7 +77,7 @@ function mean(arr) {
         });
         return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
     } catch (e) {
-        console.log({ error: 'there is no collection with user' });
+        logger.warn('there is no collection with user');
     }
 }
 
@@ -163,10 +163,10 @@ async function getDefault() {
     `;
     try {
         const [rows] = await pool.execute(query);
-        console.log(rows);
+        logger.debug(rows);
         return rows.map((row) => row.product_id);
     } catch (error) {
-        console.error(`Failed to get default recommendations: ${error}`);
+        logger.error(`Failed to get default recommendations: ${error}`);
     }
 }
 
@@ -177,7 +177,7 @@ async function main() {
 
         let currentPage = 0;
         do {
-            const response = await axios.get(`${API_URL}/api/1.0/products/all?paging=${currentPage}`);
+            const response = await axios.get(`${process.env.BACKEND_HOST}api/1.0/products/all?paging=${currentPage}`);
             const currentPageProducts = response.data.data.map((product) => product.id);
 
             product_ids.push(...currentPageProducts);
@@ -201,7 +201,7 @@ async function main() {
             });
         });
 
-        // console.log('itemMatrix', itemMatrix);
+        logger.debug('itemMatrix', itemMatrix);
         const userMatrix = [];
 
         inputFile.forEach(({ user_id, product_id }) => {
@@ -231,13 +231,13 @@ async function main() {
         }
 
         // // outputting completed matrix to console
-        for (let x of transposeMatrix(completedMatrix)) console.log(...x);
+        for (let x of transposeMatrix(completedMatrix)) logger.debug(JSON.stringify(x));
 
         function getRecommendationsForUser(user_id, completedMatrix, product_ids) {
             const userIndex = findUserIndex(user_id, inputFile);
 
             if (userIndex === -1) {
-                console.log(`Cannot find user_id  ${user_id}`);
+                logger.info(`Cannot find user_id  ${user_id}`);
                 return [];
             }
 
@@ -276,23 +276,24 @@ async function main() {
                     return pool
                         .execute(query, [userIdToRecommend, item])
                         .then((results) => {
-                            console.log(`Insert into recommendations table successfully: user_id ${userIdToRecommend}, product_id ${item}`);
+                            logger.info(`Insert into recommendations table successfully: user_id ${userIdToRecommend}, product_id ${item}`);
                         })
                         .catch((error) => {
-                            console.error(`Failed inserting into recommendations table : ${error}`);
+                            logger.error(`Failed inserting into recommendations table : ${error}`);
                             throw error;
                         });
                 });
 
                 await Promise.all(promises);
             } catch (error) {
-                console.error(error);
+                logger.error(error);
             }
         });
     } catch (e) {
-        console.log(e);
+        logger.error(e);
     }
 }
+
 try {
     async function runMain() {
         while (true) {
@@ -302,7 +303,7 @@ try {
     }
     runMain();
 } catch (error) {
-    console.error('Failed to run main', error);
+    logger.error('Failed to run main', error);
 }
 
 async function getRecommendations(req, res) {
@@ -335,7 +336,7 @@ async function getRecommendations(req, res) {
             res.status(200).send(result);
         }
     } catch (error) {
-        console.error(`Failed to get recommendations: ${error}`);
+        logger.error(`Failed to get recommendations: ${error}`);
     }
 }
 

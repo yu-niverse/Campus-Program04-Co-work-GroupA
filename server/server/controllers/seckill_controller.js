@@ -27,7 +27,7 @@ async function Seckill(req, res) {
         const userKey = `user:${userId}:product:${productId}`;
         const hasPurchased = await redis.get(userKey);
         if (hasPurchased) {
-            logger.error(`user:${userId} 已經搶購過該商品`)
+            logger.warn(`user:${userId} 已經搶購過該商品`)
             return res.status(400).json({ error: '已經搶購過該商品' });
         }
     } catch (e) {
@@ -56,7 +56,7 @@ async function Seckill(req, res) {
 
             return res.json({ success: true, message: `user:${userId} 搶購成功` });
         } else {
-            logger.error(" error: 庫存不足，搶購失敗");
+            logger.warn(" error: 庫存不足，搶購失敗");
             return res.status(400).json({ error: '庫存不足，搶購失敗' });
         }
     } catch (error) {
@@ -99,6 +99,7 @@ const getProducts = async (req, res) => {
 
     const { products, productCount } = await findProduct(category);
     if (!products) {
+        logger.warn('Seckill: findProduct Wrong Request')
         res.status(400).send({ error: 'Wrong Request' });
         return;
     }
