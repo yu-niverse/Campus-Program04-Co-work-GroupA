@@ -39,7 +39,7 @@ const SeckillProductDetails = ({ data, productId }) => {
     const [currSize, setCurrSize] = useState("F");
     const [maxAmount, setMaxAmount] = useState(1);
     const [amount, setAmount] = useState(1);
-    
+
     // trigger by color radio
     const colorSelector = (e, code) => {
         setCurrColor(e.target.value);
@@ -196,9 +196,12 @@ const SeckillProductDetails = ({ data, productId }) => {
     const handleAddLineNotification = async (productId) => {
         try {
             const data = await addLineNotification(productId);
+            if (data) {
+                alert("Add Line Notification Success");
+            }
         } catch (error) {
             if (error?.response?.data?.error === "Already exist") {
-                alert("Already exist");
+                alert("Already add Line Notification");
             }
         }
     }
@@ -383,15 +386,15 @@ const SeckillProductDetails = ({ data, productId }) => {
                                     +
                                 </button>
                             </div>
-                        </li>    
+                        </li>
                     </ul>
                     <ul >
-                    <li>
-                        <h6 className="text-brown-500">剩餘數量</h6>
-                        <StockProgressBar currentStock={maxAmount} />
-                    </li>   
+                        <li>
+                            <h6 className="text-brown-500">剩餘數量</h6>
+                            <StockProgressBar currentStock={maxAmount} />
+                        </li>
                     </ul>
-                   
+
                     <button
                         type="submit"
                         className="w-full py-2.5 md:py-5 border-2 border-solid border-gray text-xl tracking-[0.25rem] text-white bg-black hover:bg-white hover:text-black transition-all duration-300 disabled:bg-opacity-80 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:bg-opacity-80 disabled:hover:bg-black"

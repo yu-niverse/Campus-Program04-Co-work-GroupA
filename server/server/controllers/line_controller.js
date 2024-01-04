@@ -168,7 +168,7 @@ const getNotifyProductandUser = async () => {
       const { id: productId, line_notify_token, userId } = result[i];
       const message = `
       您訂閱的商品即將開賣，請留意。\n
-      ${REACT_APP_URL}seckill/${productId}
+      ${REACT_APP_URL}/seckill/${productId}
       `;
       sendLineNotification(line_notify_token, null, message);
       // update database
@@ -176,7 +176,6 @@ const getNotifyProductandUser = async () => {
     }
   } catch (error) {
     console.error('Error getNotifyProductandUser:', error);
-    res.status(500).send('Internal Server Error');
   }
 }
 

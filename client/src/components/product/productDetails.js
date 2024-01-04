@@ -218,7 +218,7 @@ const ProductDetails = ({ data, productId }) => {
                     <FaRegHeart className="h-8 w-8 hover:scale-110 transition-all duration-300" />
                 )}
             </button>
-            <button
+            {/* <button
                 className="absolute top-12 -right-8"
                 onClick={() => {
                     handleAddLineNotification(productId);
@@ -230,7 +230,7 @@ const ProductDetails = ({ data, productId }) => {
                     height={"32px"}
                     alt="line-logo"
                 />
-            </button>
+            </button> */}
 
             <div className="col-span-12 md:col-span-6 flex justify-center items-center">
                 <div className="max-h-[750px] overflow-hidden">
@@ -284,10 +284,9 @@ const ProductDetails = ({ data, productId }) => {
                                             <label
                                                 title={name}
                                                 htmlFor={name}
-                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${
-                                                    currColor === name &&
+                                                className={`h-9 w-9 flex justify-center items-center hover:outline outline-1 outline-[#979797] cursor-pointer ${currColor === name &&
                                                     "outline"
-                                                } `}
+                                                    } `}
                                                 onClick={(e) => {
                                                     colorSelector(e, code);
                                                 }}
@@ -322,11 +321,10 @@ const ProductDetails = ({ data, productId }) => {
                                     return (
                                         <li
                                             key={`size-${size}`}
-                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${
-                                                currSize === size
+                                            className={`flex justify-center w-9 h-9 border border-solid border-[#d3d3d3] rounded-full text-xl text-white hover:bg-black ${currSize === size
                                                     ? "bg-black"
                                                     : "bg-gray"
-                                            }`}
+                                                }`}
                                         >
                                             <label
                                                 htmlFor={size}
@@ -354,9 +352,8 @@ const ProductDetails = ({ data, productId }) => {
                             <h4 className="hidden md:block">數量｜</h4>
 
                             <div
-                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${
-                                    maxAmount === 0 && "border-red-500"
-                                }`}
+                                className={`grid grid-cols-12 w-full md:w-1/2 h-11 border-2 border-solid border-black ${maxAmount === 0 && "border-red-500"
+                                    }`}
                                 title={maxAmount === 0 ? "Sold Out" : ""}
                             >
                                 <button
