@@ -3,11 +3,11 @@ const axios = require('axios');
 const { getAllUsersCollections } = require('../models/collections_model');
 const { pool } = require('../models/mysqlcon');
 const { logger } = require('../../util/logger');
+const schedule = require('node-schedule');
+const { syncRecommendations } = require('../../util/cron');
 
-// const rl = require('readline/promises').createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// });
+// Sync recommendations results into DB
+syncRecommendations(main());
 
 async function getCollections(req, res) {
     // const user_id = await req.query.user_id;
@@ -70,20 +70,36 @@ function getCommonSet(a, b) {
     return result;
 }
 
+// function mean(arr) {
+//     try {
+//         let filteredArr = arr.filter((x) => {
+//             return x != -1;
+//         });
+//         return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
+//     } catch (e) {
+//         logger.warn('there is no collection with user');
+//     }
+// }
+
 function mean(arr) {
     try {
-        let filteredArr = arr.filter((x) => {
-            return x != -1;
-        });
+        let filteredArr = arr.filter((x) => x !== -1);
+
+        if (filteredArr.length === 0) {
+            // 如果所有值都是 -1，返回預設值，這裡假設為 0
+            return 0;
+        }
+
         return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
     } catch (e) {
-        logger.warn('there is no collection with user');
+        console.log({ error: 'there is no collection with user' });
     }
 }
 
 function getUserAverages(matrix) {
     let result = [];
     for (var i = 0; i < matrix.length; i++) result.push(mean(matrix[i]));
+    logger.debug(`result: ${JSON.stringify(result)}`)
     return result;
 }
 
@@ -163,7 +179,7 @@ async function getDefault() {
     `;
     try {
         const [rows] = await pool.execute(query);
-        logger.debug(rows);
+        logger.debug(`get default:${rows}`);
         return rows.map((row) => row.product_id);
     } catch (error) {
         logger.error(`Failed to get default recommendations: ${error}`);
@@ -201,7 +217,7 @@ async function main() {
             });
         });
 
-        logger.debug('itemMatrix', itemMatrix);
+        logger.debug(`itemMatrix ${JSON.stringify(itemMatrix)}`);
         const userMatrix = [];
 
         inputFile.forEach(({ user_id, product_id }) => {
@@ -217,6 +233,7 @@ async function main() {
             userMatrix.push(userRow);
         });
         // console.log('inputFile', inputFile);
+        logger.debug(`user matrix: ${JSON.stringify(userMatrix)}`)
         let neighbourhoodSize = 1;
         let completedMatrix = [];
         for (let i = 0; i < itemMatrix.length; i++) {
@@ -231,7 +248,7 @@ async function main() {
         }
 
         // // outputting completed matrix to console
-        for (let x of transposeMatrix(completedMatrix)) logger.debug(JSON.stringify(x));
+        for (let x of transposeMatrix(completedMatrix)) logger.debug(`Prediction: ${JSON.stringify(x)}`);
 
         function getRecommendationsForUser(user_id, completedMatrix, product_ids) {
             const userIndex = findUserIndex(user_id, inputFile);
@@ -294,17 +311,8 @@ async function main() {
     }
 }
 
-try {
-    async function runMain() {
-        while (true) {
-            await main();
-            await new Promise((resolve) => setTimeout(resolve, 1000000));
-        }
-    }
-    runMain();
-} catch (error) {
-    logger.error('Failed to run main', error);
-}
+
+
 
 async function getRecommendations(req, res) {
     const user_id = req.query.userId;

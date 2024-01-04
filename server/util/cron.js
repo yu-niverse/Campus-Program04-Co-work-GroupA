@@ -16,6 +16,15 @@ async function startCronJobs() {
 }
 
 
+async function syncRecommendations(main) {
+  logger.info('start recommenations jobs');
+  cron.schedule('*/5 * * * * *', async () => {
+    await main;
+  });
+}
+
+
 module.exports = {
   startCronJobs,
+  syncRecommendations
 };
