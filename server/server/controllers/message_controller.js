@@ -1,4 +1,5 @@
 const Message = require('../models/message_model');
+const { logger } = require('../../util/logger.js');
 const pageSize = 10;
 
 const getMessages = async (req, res) => {
@@ -15,6 +16,7 @@ const getMessages = async (req, res) => {
           next_paging: paging + 1,
         };
 
+  logger.debug(`Get messages by user ${userId}`);
   res.status(200).send(result);
 };
 
@@ -32,6 +34,7 @@ const getCustomerMessages = async (req, res) => {
           next_paging: paging + 1,
         };
 
+  logger.debug(`Get messages by customer ${userId}`);
   res.status(200).send(result);
 };
 

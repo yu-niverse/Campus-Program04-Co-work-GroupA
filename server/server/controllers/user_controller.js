@@ -143,7 +143,7 @@ const checkIsAdmin = async (req, res) => {
     const { userId } = req.query;
     const isAdmin = await User.isAdmin(userId);
 
-    logger.info(`${isAdmin ? 'Admin sign in' : 'User sign in'}`);
+    logger.debug(`${isAdmin ? 'Admin sign in' : 'User sign in'}`);
     res.status(200).send({ isAdmin });
     return;
 };
