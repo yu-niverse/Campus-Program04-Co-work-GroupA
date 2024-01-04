@@ -45,7 +45,7 @@ const getProductsVariants = async (productIds) => {
 async function buyProduct(productId, userId, quantity) {
     const userKey = `user:${userId}:product:${productId}`;
     const inventoryKey = `product:${productId}:inventory`;
-    logger.info('quantity: ' + quantity);
+    logger.debug('quantity: ' + quantity);
     const multi = redis.multi();
     // Start the transaction
     await multi.get(inventoryKey);
@@ -54,7 +54,7 @@ async function buyProduct(productId, userId, quantity) {
     const results = await multi.exec();
     // Check if the inventory was greater than 0 before decrementing
     const stock = await parseInt(results[0][1], 10);
-    logger.info('inventoryBeforeDecrement: ' + stock);
+    logger.debug('stock: ' + stock);
     if (stock >= quantity) {
         // store user purchase information in Redis
         const USER_PURCHASE_PREFIX = 'user';
@@ -109,7 +109,7 @@ async function syncPurchaseDataToDB() {
 async function updateStock(productId) {
     const inventoryKey = `product:${productId}:inventory`;
     const currentStock = await redis.get(inventoryKey);
-    logger.info('product:', productId, ' current stock:', currentStock);
+    logger.debug('product:', productId, ' current stock:', currentStock);
     if (currentStock >= 0 && currentStock != null) {
         const updateStockQuery = 'UPDATE seckill_variants SET stock = ? WHERE product_id = ?';
         await pool.query(updateStockQuery, [currentStock, productId]);

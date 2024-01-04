@@ -2,12 +2,12 @@
 const axios = require('axios');
 const { getAllUsersCollections } = require('../models/collections_model');
 const { pool } = require('../models/mysqlcon');
-const { API_URL } = process.env;
+const { logger } = require('../../util/logger');
+const schedule = require('node-schedule');
+const { syncRecommendations } = require('../../util/cron');
 
-// const rl = require('readline/promises').createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// });
+// Sync recommendations results into DB
+syncRecommendations(main());
 
 async function getCollections(req, res) {
     // const user_id = await req.query.user_id;
@@ -70,11 +70,26 @@ function getCommonSet(a, b) {
     return result;
 }
 
+// function mean(arr) {
+//     try {
+//         let filteredArr = arr.filter((x) => {
+//             return x != -1;
+//         });
+//         return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
+//     } catch (e) {
+//         logger.warn('there is no collection with user');
+//     }
+// }
+
 function mean(arr) {
     try {
-        let filteredArr = arr.filter((x) => {
-            return x != -1;
-        });
+        let filteredArr = arr.filter((x) => x !== -1);
+
+        if (filteredArr.length === 0) {
+            // 如果所有值都是 -1，返回預設值，這裡假設為 0
+            return 0;
+        }
+
         return filteredArr.reduce((a, b) => a + b) / filteredArr.length;
     } catch (e) {
         console.log({ error: 'there is no collection with user' });
@@ -84,6 +99,7 @@ function mean(arr) {
 function getUserAverages(matrix) {
     let result = [];
     for (var i = 0; i < matrix.length; i++) result.push(mean(matrix[i]));
+    logger.debug(`result: ${JSON.stringify(result)}`)
     return result;
 }
 
@@ -163,10 +179,10 @@ async function getDefault() {
     `;
     try {
         const [rows] = await pool.execute(query);
-        console.log(rows);
+        logger.debug(`get default:${rows}`);
         return rows.map((row) => row.product_id);
     } catch (error) {
-        console.error(`Failed to get default recommendations: ${error}`);
+        logger.error(`Failed to get default recommendations: ${error}`);
     }
 }
 
@@ -177,7 +193,7 @@ async function main() {
 
         let currentPage = 0;
         do {
-            const response = await axios.get(`${API_URL}/api/1.0/products/all?paging=${currentPage}`);
+            const response = await axios.get(`${process.env.BACKEND_HOST}api/1.0/products/all?paging=${currentPage}`);
             const currentPageProducts = response.data.data.map((product) => product.id);
 
             product_ids.push(...currentPageProducts);
@@ -201,7 +217,7 @@ async function main() {
             });
         });
 
-        // console.log('itemMatrix', itemMatrix);
+        logger.debug(`itemMatrix ${JSON.stringify(itemMatrix)}`);
         const userMatrix = [];
 
         inputFile.forEach(({ user_id, product_id }) => {
@@ -217,6 +233,7 @@ async function main() {
             userMatrix.push(userRow);
         });
         // console.log('inputFile', inputFile);
+        logger.debug(`user matrix: ${JSON.stringify(userMatrix)}`)
         let neighbourhoodSize = 1;
         let completedMatrix = [];
         for (let i = 0; i < itemMatrix.length; i++) {
@@ -231,13 +248,13 @@ async function main() {
         }
 
         // // outputting completed matrix to console
-        for (let x of transposeMatrix(completedMatrix)) console.log(...x);
+        for (let x of transposeMatrix(completedMatrix)) logger.debug(`Prediction: ${JSON.stringify(x)}`);
 
         function getRecommendationsForUser(user_id, completedMatrix, product_ids) {
             const userIndex = findUserIndex(user_id, inputFile);
 
             if (userIndex === -1) {
-                console.log(`Cannot find user_id  ${user_id}`);
+                logger.info(`Cannot find user_id  ${user_id}`);
                 return [];
             }
 
@@ -276,34 +293,26 @@ async function main() {
                     return pool
                         .execute(query, [userIdToRecommend, item])
                         .then((results) => {
-                            console.log(`Insert into recommendations table successfully: user_id ${userIdToRecommend}, product_id ${item}`);
+                            logger.info(`Insert into recommendations table successfully: user_id ${userIdToRecommend}, product_id ${item}`);
                         })
                         .catch((error) => {
-                            console.error(`Failed inserting into recommendations table : ${error}`);
+                            logger.error(`Failed inserting into recommendations table : ${error}`);
                             throw error;
                         });
                 });
 
                 await Promise.all(promises);
             } catch (error) {
-                console.error(error);
+                logger.error(error);
             }
         });
     } catch (e) {
-        console.log(e);
+        logger.error(e);
     }
 }
-try {
-    async function runMain() {
-        while (true) {
-            await main();
-            await new Promise((resolve) => setTimeout(resolve, 1000000));
-        }
-    }
-    runMain();
-} catch (error) {
-    console.error('Failed to run main', error);
-}
+
+
+
 
 async function getRecommendations(req, res) {
     const user_id = req.query.userId;
@@ -335,7 +344,7 @@ async function getRecommendations(req, res) {
             res.status(200).send(result);
         }
     } catch (error) {
-        console.error(`Failed to get recommendations: ${error}`);
+        logger.error(`Failed to get recommendations: ${error}`);
     }
 }
 
