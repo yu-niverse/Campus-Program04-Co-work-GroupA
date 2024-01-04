@@ -129,7 +129,8 @@ const Recommendation = () => {
                         );
                     })}
 
-                {isSuccess &&
+                {!(isLoading || isFetching) &&
+                    isSuccess &&
                     recommendation?.map((item) => {
                         const { id, title, colors, price, main_image } = item;
 

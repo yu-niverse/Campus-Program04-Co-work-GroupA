@@ -183,7 +183,7 @@ const Profile = () => {
 
                 {(isLoading || isFetching) && <Skeleton />}
 
-                {isSuccess && (
+                {!(isLoading || isFetching) && isSuccess && (
                     <ul className="col-start-1 sm:col-start-2 col-span-full sm:col-span-10 mx-3 divide-y divide-solid divide-black">
                         {collectionDetails?.map((collectionDetail, index) => {
                             return (
